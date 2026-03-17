@@ -5,8 +5,13 @@ import { registerCommand } from "./command-definition.ts";
 import { usageError } from "./errors.ts";
 import { readPackageVersion } from "./package-version.ts";
 
-async function createProgram(projectDir: string): Promise<Command> {
+function hasJsonFlag(argv: string[]): boolean {
+	return argv.includes("--json");
+}
+
+async function createProgram(projectDir: string, argv: string[]): Promise<Command> {
 	const packageVersion = await readPackageVersion();
+	const jsonMode = hasJsonFlag(argv);
 	const program = new Command();
 	program
 		.name("xcode-mcli")
@@ -16,6 +21,14 @@ async function createProgram(projectDir: string): Promise<Command> {
 		.option("--json", "Print command results as JSON.")
 		.option("--verbose", "Print extra execution details.")
 		.option("--tab-identifier <id>", "Active Xcode window tab identifier.")
+		.configureOutput({
+			writeErr: (value) => {
+				if (jsonMode) {
+					return;
+				}
+				process.stderr.write(value);
+			},
+		})
 		.showSuggestionAfterError()
 		.exitOverride();
 	for (const definition of commandDefinitions) {
@@ -67,7 +80,7 @@ async function parseProgram(program: Command, argv: string[]): Promise<void> {
 }
 
 export async function runXcodeMcli(argv: string[], projectDir: string): Promise<void> {
-	const program = await createProgram(projectDir);
+	const program = await createProgram(projectDir, argv);
 	if (argv.length === 0) {
 		program.outputHelp();
 		return;

@@ -28,6 +28,9 @@ type JsonSuccessEnvelope = {
 	tool?: string;
 };
 
+const GLOBAL_BOOLEAN_FLAGS = new Set(["--help", "--json", "--verbose", "--version"]);
+const GLOBAL_VALUE_FLAGS = new Set(["--tab-identifier"]);
+
 function toJsonSuccessEnvelope(input: CommandResultInput): JsonSuccessEnvelope {
 	return {
 		ok: true,
@@ -48,8 +51,16 @@ function readGlobalOptionsFromArgv(argv: string[]): GlobalOptions {
 function readCommandNameFromArgv(argv: string[]): string {
 	const commandTokens: string[] = [];
 	let reachedCommand = false;
-	for (const token of argv) {
-		if (!reachedCommand && (token === "--json" || token === "--verbose")) {
+	for (let index = 0; index < argv.length; index += 1) {
+		const token = argv[index];
+		if (typeof token !== "string") {
+			break;
+		}
+		if (!reachedCommand && GLOBAL_BOOLEAN_FLAGS.has(token)) {
+			continue;
+		}
+		if (!reachedCommand && GLOBAL_VALUE_FLAGS.has(token)) {
+			index += 1;
 			continue;
 		}
 		if (token.startsWith("-")) {
