@@ -77,7 +77,7 @@ Files used there:
 
 ```bash
 xcode-mcli windows list
-xcode-mcli files read --tab-identifier windowtab1 --file-path App/Main.swift
+xcode-mcli files read --tab-identifier windowtab1 --file-path Path/To/File.swift
 xcode-mcli build log --tab-identifier windowtab1
 xcode-mcli project build --tab-identifier windowtab1
 xcode-mcli tests list --tab-identifier windowtab1

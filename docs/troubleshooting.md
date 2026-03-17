@@ -41,7 +41,7 @@ xcode-mcli windows use --tab-identifier windowtab1
 Or pass the tab directly on the command:
 
 ```bash
-xcode-mcli files read --tab-identifier windowtab1 --file-path App/Main.swift
+xcode-mcli files read --tab-identifier windowtab1 --file-path Path/To/File.swift
 ```
 
 ## Multiple Xcode windows are open
@@ -104,7 +104,7 @@ These commands require `--yes`:
 Example:
 
 ```bash
-xcode-mcli files write --tab-identifier windowtab1 --file-path App/Main.swift --content 'let x = 1' --yes
+xcode-mcli files write --tab-identifier windowtab1 --file-path Path/To/File.swift --content 'let x = 1' --yes
 ```
 
 ## `files mkdir` or other mutating commands fail with an Xcode tool error

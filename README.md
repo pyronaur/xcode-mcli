@@ -28,7 +28,7 @@ npm install -g xcode-mcli
 xcode-mcli setup
 xcode-mcli windows list
 xcode-mcli windows use --tab-identifier windowtab1
-xcode-mcli files read --tab-identifier windowtab1 --file-path App/Main.swift
+xcode-mcli files read --tab-identifier windowtab1 --file-path Path/To/File.swift
 xcode-mcli project build --tab-identifier windowtab1
 ```
 
