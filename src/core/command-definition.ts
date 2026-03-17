@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { output, ZodType } from "zod";
 
 import type { CommandDefinition } from "./contracts.ts";
+import { describeCommandGroup, describeToolCommand } from "./description-catalog.ts";
 import { attachCommandMetadata, runtimeError, usageError } from "./errors.ts";
 
 function commandPathToString(path: readonly string[]): string {
@@ -80,7 +81,7 @@ function findOrCreateGroupCommand(program: Command, groupName: string): Command 
 	if (existingGroup) {
 		return existingGroup;
 	}
-	return program.command(groupName).description(`${groupName} commands.`).exitOverride();
+	return program.command(groupName).description(describeCommandGroup(groupName)).exitOverride();
 }
 
 function createLeafCommand(parent: Command, input: {
@@ -105,7 +106,7 @@ function createRegisteredCommand(
 	}
 	return createLeafCommand(parent, {
 		name: leaf,
-		description: definition.description,
+		description: describeToolCommand(definition.toolName, definition.description),
 	});
 }
 

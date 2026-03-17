@@ -1,7 +1,7 @@
 {
 	"name": "xcode-mcli",
 	"version": "0.1.0",
-	"description": "Stable macOS CLI wrapper for Apple's Xcode MCP bridge.",
+	"description": "One-to-one CLI for Apple's Xcode MCP bridge.",
 	"type": "module",
 	"private": false,
 	"repository": {

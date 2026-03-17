@@ -2,6 +2,7 @@ import { Command, CommanderError } from "commander";
 
 import { commandDefinitions } from "../commands/index.ts";
 import { registerCommand } from "./command-definition.ts";
+import { cliDescription } from "./description-catalog.ts";
 import { usageError } from "./errors.ts";
 import { readPackageVersion } from "./package-version.ts";
 
@@ -15,7 +16,7 @@ async function createProgram(projectDir: string, argv: string[]): Promise<Comman
 	const program = new Command();
 	program
 		.name("xcode-mcli")
-		.description("Stable macOS CLI wrapper for Apple's Xcode MCP bridge.")
+		.description(cliDescription)
 		.helpOption("--help", "Display help for command.")
 		.version(packageVersion, "--version", "Show package version.")
 		.option("--json", "Print command results as JSON.")
