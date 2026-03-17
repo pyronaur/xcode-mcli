@@ -4,6 +4,7 @@ import { z } from "zod";
 import { runtimeError } from "../core/errors.ts";
 import { resolveXcrunPath } from "./env.ts";
 import { JsonRpcPeer } from "./mcp-jsonrpc.ts";
+import { normalizeXcodeToolText } from "./xcode-windows.ts";
 
 type XcodeToolDefinition = {
 	description?: string;
@@ -45,10 +46,12 @@ const toolCallResultSchema = z.object({
 });
 
 function readTextContent(content: Array<Record<string, unknown>>): string {
-	return content
-		.filter((item) => item.type === "text" && typeof item.text === "string")
-		.map((item) => String(item.text))
-		.join("");
+	return normalizeXcodeToolText(
+		content
+			.filter((item) => item.type === "text" && typeof item.text === "string")
+			.map((item) => String(item.text))
+			.join(""),
+	);
 }
 
 function toToolCallResult(result: unknown): XcodeToolCallResult {

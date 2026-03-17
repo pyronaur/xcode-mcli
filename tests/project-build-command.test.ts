@@ -204,3 +204,60 @@ test("project build accepts a global tab identifier before the subcommand", asyn
 		delete process.env.XCODE_MCLI_XCRUN_PATH;
 	}
 });
+
+test("project build auto-resolves wrapped window text from XcodeListWindows", async () => {
+	const environment = await createFakeXcrunEnvironment({
+		tools: [
+			{
+				name: "XcodeListWindows",
+				description: "List windows.",
+				inputSchema: {
+					type: "object",
+					properties: {},
+				},
+			},
+			{
+				name: "BuildProject",
+				description: "Build project.",
+				inputSchema: {
+					type: "object",
+					properties: {
+						tabIdentifier: {
+							type: "string",
+						},
+					},
+				},
+			},
+		],
+		callResults: {
+			XcodeListWindows: {
+				content: [
+					{
+						type: "text",
+						text: "{\"message\":\"* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\\n\"}",
+					},
+				],
+			},
+			BuildProject: {
+				content: [
+					{
+						type: "text",
+						text: "Build succeeded.\n",
+					},
+				],
+			},
+		},
+	});
+	process.env.XCODE_MCLI_STATE_ROOT = environment.stateRoot;
+	process.env.XCODE_MCLI_XCRUN_PATH = environment.xcrunPath;
+	try {
+		const lines = await captureConsoleLogs(async () => {
+			await runXcodeMcli(["project", "build"], process.cwd());
+		});
+		expect(lines).toEqual(["Build succeeded."]);
+	} finally {
+		await runXcodeMcli(["daemon", "stop"], process.cwd());
+		delete process.env.XCODE_MCLI_STATE_ROOT;
+		delete process.env.XCODE_MCLI_XCRUN_PATH;
+	}
+});

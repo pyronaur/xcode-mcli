@@ -7,11 +7,10 @@ import {
 	printVerboseTool,
 	toCommandData,
 } from "../runtime/output.ts";
-
-const windowsListResultSchema = z.object({
-	structuredContent: z.unknown().optional(),
-	text: z.string().default(""),
-});
+import {
+	readWindowsFromToolResult,
+	xcodeWindowsToolResultSchema,
+} from "../runtime/xcode-windows.ts";
 
 export const windowsListCommand = defineCommand({
 	path: ["windows", "list"],
@@ -20,17 +19,22 @@ export const windowsListCommand = defineCommand({
 	optionsSchema: z.object({}),
 	run: async ({ commandPath, globals }) => {
 		printVerboseTool(globals, "XcodeListWindows");
-		const result = windowsListResultSchema.parse(
+		const result = xcodeWindowsToolResultSchema.parse(
 			await callDaemonTool({
 				name: "XcodeListWindows",
 				arguments: {},
 			}),
 		);
+		const windows = readWindowsFromToolResult(result);
 		printCommandResult({
 			commandPath,
 			globals,
 			text: result.text.trimEnd(),
-			data: toCommandData(result),
+			data: windows.length > 0
+				? {
+					windows,
+				}
+				: toCommandData(result),
 			tool: "XcodeListWindows",
 		});
 	},
