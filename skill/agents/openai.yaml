@@ -1,0 +1,4 @@
+interface:
+  display_name: "Xcode CLI"
+  short_description: "Use xcode-mcli for Xcode MCP parity"
+  default_prompt: "Use $xcode to drive Apple Xcode through the local xcode-mcli CLI instead of attaching the Xcode MCP server."
