@@ -2,6 +2,7 @@ import { EXIT_RUNTIME_ERROR, EXIT_USAGE_ERROR } from "../constants.ts";
 
 export class TemplateError extends Error {
 	public commandName?: string;
+	public details?: unknown;
 	public readonly exitCode: number;
 	public toolName?: string;
 
@@ -18,9 +19,10 @@ export function usageError(message: string): TemplateError {
 	return error;
 }
 
-export function runtimeError(message: string): TemplateError {
+export function runtimeError(message: string, details?: unknown): TemplateError {
 	const error = new TemplateError(message, EXIT_RUNTIME_ERROR);
 	error.name = "RuntimeError";
+	error.details = details;
 	return error;
 }
 

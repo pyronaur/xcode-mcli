@@ -121,6 +121,7 @@ export function printCommandError(input: CommandErrorInput): void {
 			error: {
 				kind: readErrorKind(input.error),
 				message: input.error.message,
+				details: input.error.details,
 			},
 		}),
 	);

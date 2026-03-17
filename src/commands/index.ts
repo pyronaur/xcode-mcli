@@ -5,6 +5,8 @@ import { daemonStatusCommand } from "./daemon-status.ts";
 import { daemonStopCommand } from "./daemon-stop.ts";
 import { projectBuildCommand } from "./project-build.ts";
 import { setupCommand } from "./setup.ts";
+import { surfaceSnapshotCommand } from "./surface-snapshot.ts";
+import { surfaceVerifyCommand } from "./surface-verify.ts";
 import { windowsListCommand } from "./windows-list.ts";
 import { windowsUseCommand } from "./windows-use.ts";
 import { xcodeToolCommandDefinitions } from "./xcode-tool-commands.ts";
@@ -16,6 +18,8 @@ export const commandDefinitions: CommandDefinition[] = [
 	daemonStatusCommand,
 	daemonStopCommand,
 	projectBuildCommand,
+	surfaceSnapshotCommand,
+	surfaceVerifyCommand,
 	windowsListCommand,
 	windowsUseCommand,
 	...xcodeToolCommandDefinitions,
