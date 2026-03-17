@@ -27,3 +27,27 @@ test("windows use stores the active tab in daemon state", async () => {
 		delete process.env.XCODE_MCLI_STATE_ROOT;
 	}
 });
+
+test("windows use prints a stable JSON envelope", async () => {
+	const stateRoot = await mkdtemp(join(tmpdir(), "xcode-mcli-state-json-"));
+	process.env.XCODE_MCLI_STATE_ROOT = stateRoot;
+	try {
+		const lines = await captureConsoleLogs(async () => {
+			await runXcodeMcli(
+				["windows", "use", "--tab-identifier", "windowtab1", "--json"],
+				process.cwd(),
+			);
+		});
+		expect(lines).toHaveLength(1);
+		expect(JSON.parse(lines[0] ?? "")).toEqual({
+			ok: true,
+			command: "windows use",
+			tabIdentifier: "windowtab1",
+			data: {
+				tabIdentifier: "windowtab1",
+			},
+		});
+	} finally {
+		delete process.env.XCODE_MCLI_STATE_ROOT;
+	}
+});

@@ -19,3 +19,23 @@ test("daemon status reports when the daemon is not running", async () => {
 		delete process.env.XCODE_MCLI_STATE_ROOT;
 	}
 });
+
+test("daemon status prints a stable JSON envelope when not running", async () => {
+	const stateRoot = await mkdtemp(join(tmpdir(), "xcode-mcli-daemon-status-json-"));
+	process.env.XCODE_MCLI_STATE_ROOT = stateRoot;
+	try {
+		const lines = await captureConsoleLogs(async () => {
+			await runXcodeMcli(["daemon", "status", "--json"], process.cwd());
+		});
+		expect(lines).toHaveLength(1);
+		expect(JSON.parse(lines[0] ?? "")).toEqual({
+			ok: true,
+			command: "daemon status",
+			data: {
+				running: false,
+			},
+		});
+	} finally {
+		delete process.env.XCODE_MCLI_STATE_ROOT;
+	}
+});

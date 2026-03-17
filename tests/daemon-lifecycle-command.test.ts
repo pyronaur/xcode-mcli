@@ -60,3 +60,50 @@ test("daemon lifecycle commands start, report, and stop the daemon", async () =>
 		delete process.env.XCODE_MCLI_STATE_ROOT;
 	}
 });
+
+test("daemon lifecycle commands print stable JSON envelopes", async () => {
+	const stateRoot = await mkdtemp(join(tmpdir(), "xcode-mcli-daemon-life-json-"));
+	process.env.XCODE_MCLI_STATE_ROOT = stateRoot;
+	try {
+		const startLines = await withTimeout("daemon start json", async () =>
+			captureConsoleLogs(async () => {
+				await runXcodeMcli(["daemon", "start", "--json"], process.cwd());
+			}),
+		);
+		expect(JSON.parse(startLines[0] ?? "")).toEqual({
+			ok: true,
+			command: "daemon start",
+			data: {
+				running: true,
+			},
+		});
+
+		const restartLines = await withTimeout("daemon restart json", async () =>
+			captureConsoleLogs(async () => {
+				await runXcodeMcli(["daemon", "restart", "--json"], process.cwd());
+			}),
+		);
+		expect(JSON.parse(restartLines[0] ?? "")).toEqual({
+			ok: true,
+			command: "daemon restart",
+			data: {
+				running: true,
+			},
+		});
+
+		const stopLines = await withTimeout("daemon stop json", async () =>
+			captureConsoleLogs(async () => {
+				await runXcodeMcli(["daemon", "stop", "--json"], process.cwd());
+			}),
+		);
+		expect(JSON.parse(stopLines[0] ?? "")).toEqual({
+			ok: true,
+			command: "daemon stop",
+			data: {
+				running: false,
+			},
+		});
+	} finally {
+		delete process.env.XCODE_MCLI_STATE_ROOT;
+	}
+});
