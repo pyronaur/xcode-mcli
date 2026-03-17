@@ -12,7 +12,7 @@ export const windowsUseCommand = defineCommand({
 	path: ["windows", "use"],
 	description: "Select the active Xcode window tab.",
 	configure: (command) => {
-		command.requiredOption("--tab-identifier <id>", "Active Xcode window tab identifier.");
+		command.option("--tab-identifier <id>", "Active Xcode window tab identifier.");
 	},
 	optionsSchema: windowsUseOptionsSchema,
 	run: async ({ commandPath, globals, options }) => {

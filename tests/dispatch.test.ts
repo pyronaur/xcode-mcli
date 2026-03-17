@@ -90,3 +90,21 @@ test("dispatch throws usage error for schema validation failure", async () => {
 		expect(error.message).toContain("Invalid options for command: windows use");
 	}
 });
+
+test("dispatch accepts a global tab identifier before the subcommand", async () => {
+	const lines = await captureConsoleLogs(async () => {
+		await runXcodeMcli(
+			["--tab-identifier", "windowtab1", "windows", "use", "--json"],
+			process.cwd(),
+		);
+	});
+	expect(lines).toHaveLength(1);
+	expect(JSON.parse(lines[0] ?? "")).toEqual({
+		ok: true,
+		command: "windows use",
+		tabIdentifier: "windowtab1",
+		data: {
+			tabIdentifier: "windowtab1",
+		},
+	});
+});

@@ -39,7 +39,7 @@ const globalOptionsSchema = z.object({
 });
 
 function readGlobalOptions(command: Command) {
-	return globalOptionsSchema.parse(command.opts());
+	return globalOptionsSchema.parse(command.optsWithGlobals());
 }
 
 function addSharedGlobalOptions(command: Command): void {
@@ -57,7 +57,7 @@ function registerCommandAction<TSchema extends ZodType>(input: {
 		const parsedOptions = parseOptions(
 			input.definition.path,
 			input.definition.optionsSchema,
-			command.opts(),
+			command.optsWithGlobals(),
 		);
 		await input.definition.run({
 			commandPath: input.definition.path,

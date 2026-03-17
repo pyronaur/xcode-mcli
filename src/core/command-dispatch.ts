@@ -13,6 +13,9 @@ async function createProgram(projectDir: string): Promise<Command> {
 		.description("Stable macOS CLI wrapper for Apple's Xcode MCP bridge.")
 		.helpOption("--help", "Display help for command.")
 		.version(packageVersion, "--version", "Show package version.")
+		.option("--json", "Print command results as JSON.")
+		.option("--verbose", "Print extra execution details.")
+		.option("--tab-identifier <id>", "Active Xcode window tab identifier.")
 		.showSuggestionAfterError()
 		.exitOverride();
 	for (const definition of commandDefinitions) {
