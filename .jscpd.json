@@ -1,0 +1,16 @@
+{
+	"threshold": 0,
+	"reporters": ["console"],
+	"minTokens": 40,
+	"minLines": 3,
+	"formats": ["typescript", "javascript"],
+	"ignore": [
+		"**/tests/**",
+		"**/*.test.*",
+		"**/node_modules/**",
+		"**/.git/**",
+		"**/*.md",
+		"**/package-lock.json",
+		"**/*.json"
+	]
+}

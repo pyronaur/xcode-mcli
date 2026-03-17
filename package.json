@@ -1,0 +1,40 @@
+{
+	"name": "command-template",
+	"version": "0.1.0",
+	"description": "Reusable strict TypeScript CLI command template.",
+	"type": "module",
+	"private": false,
+	"bin": {
+		"command-template": "./bin/command-template.ts"
+	},
+	"engines": {
+		"node": ">=25"
+	},
+	"scripts": {
+		"lint": "npm run lint:dprint:fix && npm run lint:oxlint:fix && npm run typecheck && npm run jscpd && npm run knip",
+		"lint-dry": "npm run lint:dprint && npm run lint:oxlint && npm run typecheck && npm run jscpd && npm run knip",
+		"lint:dprint": "dprint check",
+		"lint:oxlint": "oxlint --type-aware --tsconfig tsconfig.json .",
+		"lint:dprint:fix": "dprint fmt",
+		"lint:oxlint:fix": "oxlint --type-aware --tsconfig tsconfig.json --fix .",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"jscpd": "jscpd --config .jscpd.json",
+		"knip": "knip",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"commander": "^14.0.1",
+		"zod": "^4.1.8"
+	},
+	"devDependencies": {
+		"@types/node": "^24.5.2",
+		"dprint": "^0.52.0",
+		"jscpd": "^4.0.8",
+		"knip": "^5.85.0",
+		"oxlint": "^1.50.0",
+		"oxlint-plugin-inhuman": "^0.1.7",
+		"oxlint-tsgolint": "^0.15.0",
+		"typescript": "^5",
+		"vitest": "^3.2.4"
+	}
+}

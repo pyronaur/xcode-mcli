@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/steipete/mcporter/main/mcporter.schema.json",
+  "mcpServers": {
+    "xcode": {
+      "description": "Apple Xcode MCP via xcrun mcpbridge",
+      "command": "xcrun",
+      "args": ["mcpbridge"],
+      "lifecycle": "keep-alive"
+    }
+  }
+}

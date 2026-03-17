@@ -1,0 +1,10 @@
+{
+	"entry": [
+		"src/core/command-dispatch.ts",
+		"src/core/command-definition.ts",
+		"src/commands/index.ts",
+		"src/commands/*.ts"
+	],
+	"project": ["tsconfig.json"],
+	"ignoreDependencies": ["oxlint-plugin-inhuman"]
+}
