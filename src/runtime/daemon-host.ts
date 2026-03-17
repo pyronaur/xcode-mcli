@@ -89,6 +89,15 @@ const daemonResponseSchema = z.union([
 		error: z.string().min(1),
 	}),
 ]);
+const daemonToolResultSchema = z.object({
+	isError: z.boolean().optional(),
+	structuredContent: z.unknown().optional(),
+	text: z.string().optional(),
+});
+const structuredToolErrorSchema = z.object({
+	type: z.literal("error"),
+	data: z.string().min(1),
+});
 let bridgeClient: Awaited<ReturnType<typeof createXcodeBridgeClient>> | null = null;
 
 async function bindDaemonCleanup(server: net.Server): Promise<void> {
@@ -290,6 +299,25 @@ async function delay(ms: number): Promise<void> {
 	});
 }
 
+function readDaemonToolErrorMessage(result: unknown): string | null {
+	const parsed = daemonToolResultSchema.safeParse(result);
+	if (!parsed.success) {
+		return null;
+	}
+	const structuredError = structuredToolErrorSchema.safeParse(parsed.data.structuredContent);
+	if (structuredError.success) {
+		return structuredError.data.data;
+	}
+	if (!parsed.data.isError) {
+		return null;
+	}
+	const text = parsed.data.text?.trim();
+	if (text) {
+		return text;
+	}
+	return "Xcode MCP tool failed.";
+}
+
 export async function callDaemonTool(input: {
 	arguments: Record<string, unknown>;
 	name: string;
@@ -302,6 +330,10 @@ export async function callDaemonTool(input: {
 		arguments: input.arguments,
 	});
 	if (response.ok) {
+		const toolErrorMessage = readDaemonToolErrorMessage(response.result);
+		if (toolErrorMessage) {
+			throw runtimeError(toolErrorMessage);
+		}
 		return response.result;
 	}
 	throw runtimeError(response.error);

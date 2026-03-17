@@ -761,7 +761,7 @@ HITL reason:
 
 - [x] Validate the daemon-backed repeated-call path against real Xcode.
 - [x] Validate `windows list` against a real workspace.
-- [ ] Validate one read-only file command against a real workspace.
+- [x] Validate one read-only file command against a real workspace.
 - [x] Validate one project or test command against a real workspace if feasible.
 - [ ] Validate one mutating command only if it can be done safely in a disposable surface.
 

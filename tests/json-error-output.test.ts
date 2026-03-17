@@ -76,3 +76,59 @@ test("cli includes the resolved Xcode tool name in JSON runtime errors", async (
 		},
 	});
 });
+
+test("cli treats structured tool error payloads as runtime failures", async () => {
+	const environment = await createFakeXcrunEnvironment({
+		tools: [
+			{
+				name: "XcodeMakeDir",
+				description: "Make directory.",
+				inputSchema: {
+					type: "object",
+					properties: {
+						directoryPath: {
+							type: "string",
+						},
+						tabIdentifier: {
+							type: "string",
+						},
+					},
+				},
+			},
+		],
+		callResults: {
+			XcodeMakeDir: {
+				structuredContent: {
+					type: "error",
+					data: "Run XcodeLS before using XcodeMakeDir.",
+				},
+			},
+		},
+	});
+	const result = await runCliProcess({
+		args: [
+			"files",
+			"mkdir",
+			"--directory-path",
+			"Scratch/Temp",
+			"--tab-identifier",
+			"windowtab1",
+			"--json",
+		],
+		env: {
+			XCODE_MCLI_STATE_ROOT: environment.stateRoot,
+			XCODE_MCLI_XCRUN_PATH: environment.xcrunPath,
+		},
+	});
+	expect(result.exitCode).toBe(EXIT_RUNTIME_ERROR);
+	expect(result.stderr).toBe("");
+	expect(JSON.parse(result.stdout)).toEqual({
+		ok: false,
+		command: "files mkdir",
+		tool: "XcodeMakeDir",
+		error: {
+			kind: "runtime",
+			message: "Run XcodeLS before using XcodeMakeDir.",
+		},
+	});
+});
