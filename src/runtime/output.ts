@@ -1,4 +1,6 @@
+import { EXIT_USAGE_ERROR } from "../constants.ts";
 import type { GlobalOptions } from "../core/contracts.ts";
+import type { TemplateError } from "../core/errors.ts";
 
 type CommandResultInput = {
 	commandPath: readonly string[];
@@ -7,6 +9,11 @@ type CommandResultInput = {
 	tabIdentifier?: string;
 	text?: string;
 	tool?: string;
+};
+
+type CommandErrorInput = {
+	argv: string[];
+	error: TemplateError;
 };
 
 function commandPathToString(commandPath: readonly string[]): string {
@@ -31,10 +38,55 @@ function toJsonSuccessEnvelope(input: CommandResultInput): JsonSuccessEnvelope {
 	};
 }
 
+function readGlobalOptionsFromArgv(argv: string[]): GlobalOptions {
+	return {
+		json: argv.includes("--json"),
+		verbose: argv.includes("--verbose"),
+	};
+}
+
+function readCommandNameFromArgv(argv: string[]): string {
+	const commandTokens: string[] = [];
+	let reachedCommand = false;
+	for (const token of argv) {
+		if (!reachedCommand && (token === "--json" || token === "--verbose")) {
+			continue;
+		}
+		if (token.startsWith("-")) {
+			break;
+		}
+		reachedCommand = true;
+		commandTokens.push(token);
+	}
+	return commandTokens.join(" ");
+}
+
+function readErrorKind(error: TemplateError): "runtime" | "usage" {
+	return error.exitCode === EXIT_USAGE_ERROR ? "usage" : "runtime";
+}
+
 export function printCommandResult(input: CommandResultInput): void {
 	if (input.globals.json) {
 		console.log(JSON.stringify(toJsonSuccessEnvelope(input)));
 		return;
 	}
 	console.log(input.text ?? "");
+}
+
+export function printCommandError(input: CommandErrorInput): void {
+	const globals = readGlobalOptionsFromArgv(input.argv);
+	if (!globals.json) {
+		console.error(input.error.message);
+		return;
+	}
+	console.log(
+		JSON.stringify({
+			ok: false,
+			command: readCommandNameFromArgv(input.argv),
+			error: {
+				kind: readErrorKind(input.error),
+				message: input.error.message,
+			},
+		}),
+	);
 }
