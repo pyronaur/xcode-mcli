@@ -51,6 +51,18 @@ for await (const line of rl) {
 		});
 		continue;
 	}
+	if (message.method === "prompts/list") {
+		writeResponse(message.id, {
+			prompts: scenario.prompts ?? [],
+		});
+		continue;
+	}
+	if (message.method === "resources/list") {
+		writeResponse(message.id, {
+			resources: scenario.resources ?? [],
+		});
+		continue;
+	}
 	if (message.method === "tools/call") {
 		if (scenario.eventLogPath) {
 			await appendFile(

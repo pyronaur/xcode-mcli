@@ -7,6 +7,12 @@ type FakeToolDefinition = {
 	name: string;
 	description?: string;
 	inputSchema?: Record<string, unknown>;
+	[key: string]: unknown;
+};
+
+type FakeSurfaceEntry = {
+	name: string;
+	[key: string]: unknown;
 };
 
 type FakeToolResult = {
@@ -18,6 +24,8 @@ type FakeToolResult = {
 type FakeBridgeScenario = {
 	callResults?: Record<string, FakeToolResult>;
 	eventLogPath?: string;
+	prompts?: FakeSurfaceEntry[];
+	resources?: FakeSurfaceEntry[];
 	tools?: FakeToolDefinition[];
 };
 

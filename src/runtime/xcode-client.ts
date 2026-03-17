@@ -7,6 +7,18 @@ import { JsonRpcPeer } from "./mcp-jsonrpc.ts";
 import { type XcodeToolDefinition, xcodeToolDefinitionSchema } from "./xcode-tool-definition.ts";
 import { normalizeXcodeToolText } from "./xcode-windows.ts";
 
+type McpSurfaceEntry = {
+	name: string;
+	[key: string]: unknown;
+};
+
+type XcodeMcpSurface = {
+	protocolVersion: string;
+	prompts: McpSurfaceEntry[];
+	resources: McpSurfaceEntry[];
+	tools: XcodeToolDefinition[];
+};
+
 type XcodeToolCallResult = {
 	content: Array<Record<string, unknown>>;
 	isError: boolean;
@@ -20,13 +32,19 @@ type XcodeBridgeClient = {
 		input: { arguments: Record<string, unknown>; name: string },
 	): Promise<XcodeToolCallResult>;
 	close(): Promise<void>;
+	listPrompts(): Promise<McpSurfaceEntry[]>;
+	listResources(): Promise<McpSurfaceEntry[]>;
 	listTools(): Promise<XcodeToolDefinition[]>;
+	protocolVersion: string;
 };
 
 const MCP_PROTOCOL_VERSION = "2025-06-18";
 const initializeResultSchema = z.object({
 	protocolVersion: z.string().min(1),
 });
+const mcpSurfaceEntrySchema = z.object({
+	name: z.string().min(1),
+}).catchall(z.unknown());
 
 function readTextContent(content: Array<Record<string, unknown>>): string {
 	return normalizeXcodeToolText(
@@ -69,7 +87,7 @@ function toToolCallResult(result: unknown): XcodeToolCallResult {
 	};
 }
 
-async function initializeClient(peer: JsonRpcPeer): Promise<void> {
+async function initializeClient(peer: JsonRpcPeer): Promise<string> {
 	const result = initializeResultSchema.parse(
 		await peer.request("initialize", {
 			protocolVersion: MCP_PROTOCOL_VERSION,
@@ -84,10 +102,17 @@ async function initializeClient(peer: JsonRpcPeer): Promise<void> {
 		throw runtimeError("Bridge initialize did not return a protocol version.");
 	}
 	peer.notify("notifications/initialized", {});
+	return result.protocolVersion;
 }
 
 const listToolsResultSchema = z.object({
 	tools: z.array(xcodeToolDefinitionSchema).default([]),
+});
+const listPromptsResultSchema = z.object({
+	prompts: z.array(mcpSurfaceEntrySchema).default([]),
+});
+const listResourcesResultSchema = z.object({
+	resources: z.array(mcpSurfaceEntrySchema).default([]),
 });
 const toolCallResultSchema = z.object({
 	content: z.array(z.record(z.string(), z.unknown())).default([]),
@@ -101,9 +126,12 @@ export async function createXcodeBridgeClient(): Promise<XcodeBridgeClient> {
 		env: process.env,
 	});
 	const peer = new JsonRpcPeer(child);
-	await initializeClient(peer);
+	const protocolVersion = await initializeClient(peer);
 	let cachedTools: XcodeToolDefinition[] | null = null;
+	let cachedPrompts: McpSurfaceEntry[] | null = null;
+	let cachedResources: McpSurfaceEntry[] | null = null;
 	return {
+		protocolVersion,
 		bridgeProcessId: child.pid,
 		listTools: async () => {
 			if (cachedTools) {
@@ -112,6 +140,24 @@ export async function createXcodeBridgeClient(): Promise<XcodeBridgeClient> {
 			const result = listToolsResultSchema.parse(await peer.request("tools/list", {}));
 			cachedTools = result.tools;
 			return cachedTools;
+		},
+		listPrompts: async () => {
+			if (cachedPrompts) {
+				return cachedPrompts;
+			}
+			const result = listPromptsResultSchema.parse(await peer.request("prompts/list", {}));
+			cachedPrompts = result.prompts;
+			return cachedPrompts;
+		},
+		listResources: async () => {
+			if (cachedResources) {
+				return cachedResources;
+			}
+			const result = listResourcesResultSchema.parse(
+				await peer.request("resources/list", {}),
+			);
+			cachedResources = result.resources;
+			return cachedResources;
 		},
 		callTool: async ({ name, arguments: toolArguments }) => {
 			const result = await peer.request("tools/call", {
@@ -124,4 +170,23 @@ export async function createXcodeBridgeClient(): Promise<XcodeBridgeClient> {
 			await peer.close();
 		},
 	};
+}
+
+export async function readXcodeMcpSurface(): Promise<XcodeMcpSurface> {
+	const client = await createXcodeBridgeClient();
+	try {
+		const [tools, prompts, resources] = await Promise.all([
+			client.listTools(),
+			client.listPrompts(),
+			client.listResources(),
+		]);
+		return {
+			protocolVersion: client.protocolVersion,
+			tools,
+			prompts,
+			resources,
+		};
+	} finally {
+		await client.close();
+	}
 }
