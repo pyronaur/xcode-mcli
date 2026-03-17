@@ -65,6 +65,22 @@ function readErrorKind(error: TemplateError): "runtime" | "usage" {
 	return error.exitCode === EXIT_USAGE_ERROR ? "usage" : "runtime";
 }
 
+export function toCommandData(input: {
+	structuredContent?: unknown;
+	text?: string;
+}): unknown {
+	if (input.structuredContent !== undefined) {
+		return input.structuredContent;
+	}
+	const text = input.text?.trimEnd() ?? "";
+	if (text.length > 0) {
+		return {
+			text,
+		};
+	}
+	return {};
+}
+
 export function printCommandResult(input: CommandResultInput): void {
 	if (input.globals.json) {
 		console.log(JSON.stringify(toJsonSuccessEnvelope(input)));

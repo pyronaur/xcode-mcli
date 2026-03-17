@@ -65,3 +65,62 @@ test("windows list reuses one daemon-backed bridge session across repeated calls
 		delete process.env.XCODE_MCLI_XCRUN_PATH;
 	}
 });
+
+test("windows list prints a stable JSON envelope", async () => {
+	await mkdtemp(join(tmpdir(), "xcode-mcli-windows-json-"));
+	const environment = await createFakeXcrunEnvironment({
+		tools: [
+			{
+				name: "XcodeListWindows",
+				description: "List windows.",
+				inputSchema: {
+					type: "object",
+					properties: {},
+				},
+			},
+		],
+		callResults: {
+			XcodeListWindows: {
+				content: [
+					{
+						type: "text",
+						text: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
+					},
+				],
+				structuredContent: {
+					windows: [
+						{
+							tabIdentifier: "windowtab1",
+							workspacePath: "/tmp/Countdown.xcworkspace",
+						},
+					],
+				},
+			},
+		},
+	});
+	process.env.XCODE_MCLI_STATE_ROOT = environment.stateRoot;
+	process.env.XCODE_MCLI_XCRUN_PATH = environment.xcrunPath;
+	try {
+		const lines = await captureConsoleLogs(async () => {
+			await runXcodeMcli(["windows", "list", "--json"], process.cwd());
+		});
+		expect(lines).toHaveLength(1);
+		expect(JSON.parse(lines[0] ?? "")).toEqual({
+			ok: true,
+			command: "windows list",
+			tool: "XcodeListWindows",
+			data: {
+				windows: [
+					{
+						tabIdentifier: "windowtab1",
+						workspacePath: "/tmp/Countdown.xcworkspace",
+					},
+				],
+			},
+		});
+	} finally {
+		await runXcodeMcli(["daemon", "stop"], process.cwd());
+		delete process.env.XCODE_MCLI_STATE_ROOT;
+		delete process.env.XCODE_MCLI_XCRUN_PATH;
+	}
+});

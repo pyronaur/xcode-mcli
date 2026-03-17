@@ -5,6 +5,7 @@ import { z } from "zod";
 import { defineCommand } from "../core/command-definition.ts";
 import { runtimeError } from "../core/errors.ts";
 import { callDaemonTool } from "../runtime/daemon-host.ts";
+import { printCommandResult, toCommandData } from "../runtime/output.ts";
 import { resolveTabIdentifier } from "../runtime/tab-resolver.ts";
 
 type ToolCommandResult = {
@@ -115,7 +116,7 @@ export function createToolCommand<TOptions>(input: ToolCommandDefinitionInput<TO
 		description: input.description,
 		configure: input.configure,
 		optionsSchema: input.optionsSchema,
-		run: async ({ options }) => {
+		run: async ({ commandPath, globals, options }) => {
 			const toolArguments = await input.buildArguments(options);
 			if (input.requiresTab && typeof toolArguments.tabIdentifier !== "string") {
 				toolArguments.tabIdentifier = await resolveTabIdentifier({
@@ -128,7 +129,16 @@ export function createToolCommand<TOptions>(input: ToolCommandDefinitionInput<TO
 					arguments: toolArguments,
 				}),
 			);
-			console.log(defaultToolText(result));
+			printCommandResult({
+				commandPath,
+				globals,
+				text: defaultToolText(result),
+				data: toCommandData(result),
+				tabIdentifier: typeof toolArguments.tabIdentifier === "string"
+					? toolArguments.tabIdentifier
+					: undefined,
+				tool: input.toolName,
+			});
 		},
 	});
 }

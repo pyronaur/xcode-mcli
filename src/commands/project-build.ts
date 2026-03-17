@@ -2,12 +2,14 @@ import { z } from "zod";
 
 import { defineCommand } from "../core/command-definition.ts";
 import { callDaemonTool } from "../runtime/daemon-host.ts";
+import { printCommandResult, toCommandData } from "../runtime/output.ts";
 import { resolveTabIdentifier } from "../runtime/tab-resolver.ts";
 
 const projectBuildOptionsSchema = z.object({
 	tabIdentifier: z.string().trim().min(1).optional(),
 });
 const projectBuildResultSchema = z.object({
+	structuredContent: z.unknown().optional(),
 	text: z.string().default(""),
 });
 
@@ -18,7 +20,7 @@ export const projectBuildCommand = defineCommand({
 		command.option("--tab-identifier <id>", "Active Xcode window tab identifier.");
 	},
 	optionsSchema: projectBuildOptionsSchema,
-	run: async ({ options }) => {
+	run: async ({ commandPath, globals, options }) => {
 		const tabIdentifier = await resolveTabIdentifier({
 			explicitTabIdentifier: options.tabIdentifier,
 		});
@@ -30,6 +32,13 @@ export const projectBuildCommand = defineCommand({
 				},
 			}),
 		);
-		console.log(result.text.trimEnd());
+		printCommandResult({
+			commandPath,
+			globals,
+			text: result.text.trimEnd(),
+			data: toCommandData(result),
+			tabIdentifier,
+			tool: "BuildProject",
+		});
 	},
 });

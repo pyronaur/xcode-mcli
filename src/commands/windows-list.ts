@@ -2,8 +2,10 @@ import { z } from "zod";
 
 import { defineCommand } from "../core/command-definition.ts";
 import { callDaemonTool } from "../runtime/daemon-host.ts";
+import { printCommandResult, toCommandData } from "../runtime/output.ts";
 
 const windowsListResultSchema = z.object({
+	structuredContent: z.unknown().optional(),
 	text: z.string().default(""),
 });
 
@@ -11,13 +13,19 @@ export const windowsListCommand = defineCommand({
 	path: ["windows", "list"],
 	description: "List open Xcode windows.",
 	optionsSchema: z.object({}),
-	run: async () => {
+	run: async ({ commandPath, globals }) => {
 		const result = windowsListResultSchema.parse(
 			await callDaemonTool({
 				name: "XcodeListWindows",
 				arguments: {},
 			}),
 		);
-		console.log(result.text.trimEnd());
+		printCommandResult({
+			commandPath,
+			globals,
+			text: result.text.trimEnd(),
+			data: toCommandData(result),
+			tool: "XcodeListWindows",
+		});
 	},
 });
