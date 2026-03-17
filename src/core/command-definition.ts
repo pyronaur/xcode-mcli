@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { z } from "zod";
 import type { output, ZodType } from "zod";
 
 import type { CommandDefinition } from "./contracts.ts";
@@ -32,6 +33,20 @@ function readCommand(actionArgs: unknown[]): Command {
 	throw runtimeError("Failed to read command context.");
 }
 
+const globalOptionsSchema = z.object({
+	json: z.boolean().default(false),
+	verbose: z.boolean().default(false),
+});
+
+function readGlobalOptions(command: Command) {
+	return globalOptionsSchema.parse(command.opts());
+}
+
+function addSharedGlobalOptions(command: Command): void {
+	command.option("--json", "Print command results as JSON.");
+	command.option("--verbose", "Print extra execution details.");
+}
+
 function registerCommandAction<TSchema extends ZodType>(input: {
 	command: Command;
 	definition: CommandDefinition<TSchema>;
@@ -45,6 +60,8 @@ function registerCommandAction<TSchema extends ZodType>(input: {
 			command.opts(),
 		);
 		await input.definition.run({
+			commandPath: input.definition.path,
+			globals: readGlobalOptions(command),
 			projectDir: input.projectDir,
 			options: parsedOptions,
 		});
@@ -91,6 +108,7 @@ export function registerCommand<TSchema extends ZodType>(input: {
 	projectDir: string;
 }): void {
 	const command = createRegisteredCommand(input.program, input.definition);
+	addSharedGlobalOptions(command);
 	input.definition.configure?.(command);
 	registerCommandAction({
 		command,

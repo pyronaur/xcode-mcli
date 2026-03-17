@@ -1,7 +1,14 @@
 import type { Command } from "commander";
 import type { output, ZodType } from "zod";
 
+export type GlobalOptions = {
+	json: boolean;
+	verbose: boolean;
+};
+
 export type CommandRunContext<TOptions> = {
+	commandPath: CommandPath;
+	globals: GlobalOptions;
 	projectDir: string;
 	options: TOptions;
 };
