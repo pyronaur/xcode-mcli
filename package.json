@@ -4,6 +4,12 @@
 	"description": "Stable macOS CLI wrapper for Apple's Xcode MCP bridge.",
 	"type": "module",
 	"private": false,
+	"files": [
+		"bin",
+		"config",
+		"skill",
+		"src"
+	],
 	"bin": {
 		"xcode-mcli": "./bin/xcode-mcli.ts"
 	},

@@ -16,9 +16,9 @@ Prefer this skill when the task needs Xcode access but the Xcode MCP server shou
 Use one of these paths:
 
 - Global install: `xcode-mcli`
-- Repo checkout: `node /Users/n14/Projects/Tools/xcode-mcli/bin/xcode-mcli.ts`
+- Repo checkout: `node ./bin/xcode-mcli.ts`
 
-When working from the repo checkout, use `/Users/n14/Projects/Tools/xcode-mcli` as the default project root unless the user says otherwise.
+When working from the repo checkout, use the `xcode-mcli` repository root as the default project root unless the user says otherwise.
 
 ## Start Here
 
@@ -64,7 +64,7 @@ When exact parameter or output details matter, trust the JSON snapshot over memo
 
 When Xcode changes:
 
-1. Run `npm run compat:xcode-mcp:verify` from `/Users/n14/Projects/Tools/xcode-mcli`.
+1. Run `npm run compat:xcode-mcp:verify` from the `xcode-mcli` repository root.
 2. If it fails, read `references/compatibility.md`.
 3. Inspect the exact live-vs-baseline diff with `xcode-mcli surface verify --baseline-file skill/references/apple-xcode-26.3.surface.json --json`.
 4. Use `references/apple-xcode-26.3.surface.json` as the pinned baseline reference.
