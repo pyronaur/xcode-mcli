@@ -212,42 +212,87 @@ function writeDaemonResponse(socket: net.Socket, response: DaemonResponse): void
 	socket.write(`${JSON.stringify(response)}\n`);
 }
 
+function appendCompleteLines(input: {
+	buffer: string;
+	chunk: string;
+	onLine: (line: string) => void;
+}): string {
+	const lines = `${input.buffer}${input.chunk}`.split("\n");
+	const nextBuffer = lines.pop() ?? "";
+	for (const line of lines) {
+		input.onLine(line);
+	}
+	return nextBuffer;
+}
+
 async function sendDaemonRequest(request: DaemonRequest): Promise<DaemonResponse> {
 	const socketPath = resolveDaemonSocketPath();
 	return new Promise((resolve, reject) => {
 		const socket = net.createConnection(socketPath);
 		let buffer = "";
+		let settled = false;
 		const connectTimeoutMs = request.kind === "callTool"
 			? DAEMON_TOOL_CONNECT_TIMEOUT_MS
 			: DAEMON_PING_TIMEOUT_MS;
 		const timeout = setTimeout(() => {
-			socket.destroy();
-			reject(runtimeError("Timed out while contacting daemon."));
+			settle(() => {
+				socket.destroy();
+				reject(runtimeError("Timed out while contacting daemon."));
+			});
 		}, connectTimeoutMs);
 		const settle = (callback: () => void) => {
+			if (settled) {
+				return;
+			}
+			settled = true;
 			clearTimeout(timeout);
 			callback();
 		};
 		socket.setEncoding("utf8");
 		socket.on("connect", () => {
-			clearTimeout(timeout);
 			socket.write(`${JSON.stringify(request)}\n`);
 		});
 		socket.on("data", (chunk) => {
-			buffer += chunk;
-			const [line] = buffer.split("\n");
-			if (!line) {
-				return;
-			}
-			socket.end();
+			buffer = appendCompleteLines({
+				buffer,
+				chunk: String(chunk),
+				onLine: (line) => {
+					if (!line) {
+						return;
+					}
+					socket.end();
+					settle(() => {
+						resolve(daemonResponseSchema.parse(JSON.parse(line)));
+					});
+				},
+			});
+		});
+		socket.on("end", () => {
 			settle(() => {
-				resolve(daemonResponseSchema.parse(JSON.parse(line)));
+				reject(runtimeError("Daemon closed the connection without replying."));
 			});
 		});
 		socket.on("error", (error) => {
 			settle(() => {
 				reject(runtimeError(`Failed to contact daemon. ${error.message}`));
 			});
+		});
+	});
+}
+
+function bindDaemonRequestServer(server: net.Server, socket: net.Socket): void {
+	let buffer = "";
+	socket.setEncoding("utf8");
+	socket.on("data", (chunk) => {
+		buffer = appendCompleteLines({
+			buffer,
+			chunk: String(chunk),
+			onLine: (line) => {
+				if (line.trim().length === 0) {
+					return;
+				}
+				void handleDaemonRequestSafely(server, socket, line);
+			},
 		});
 	});
 }
@@ -396,19 +441,7 @@ export async function runDaemonHost(): Promise<void> {
 	await rm(resolveDaemonSocketPath(), { force: true });
 	await writeFile(resolveDaemonPidFilePath(), `${process.pid}\n`);
 	const server = net.createServer((socket) => {
-		let buffer = "";
-		socket.setEncoding("utf8");
-		socket.on("data", (chunk) => {
-			buffer += chunk;
-			const lines = buffer.split("\n");
-			buffer = lines.pop() ?? "";
-			for (const line of lines) {
-				if (line.trim().length === 0) {
-					continue;
-				}
-				void handleDaemonRequestSafely(server, socket, line);
-			}
-		});
+		bindDaemonRequestServer(server, socket);
 	});
 	await new Promise<void>((resolve, reject) => {
 		server.once("error", reject);
