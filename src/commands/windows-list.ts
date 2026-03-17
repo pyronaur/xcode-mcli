@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCommand } from "../core/command-definition.ts";
 import { callDaemonTool } from "../runtime/daemon-host.ts";
+import { setLastSeenWindows } from "../runtime/daemon-state.ts";
 import {
 	printCommandResult,
 	printVerboseTool,
@@ -26,6 +27,7 @@ export const windowsListCommand = defineCommand({
 			}),
 		);
 		const windows = readWindowsFromToolResult(result);
+		await setLastSeenWindows(windows);
 		printCommandResult({
 			commandPath,
 			globals,

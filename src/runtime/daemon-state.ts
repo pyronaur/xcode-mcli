@@ -2,9 +2,11 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { z } from "zod";
 
 import { resolveStateFilePath, resolveStateRoot } from "./env.ts";
+import { xcodeWindowSchema } from "./xcode-windows.ts";
 
 const daemonStateSchema = z.object({
 	activeTabIdentifier: z.string().trim().min(1).optional(),
+	lastSeenWindows: z.array(xcodeWindowSchema).optional(),
 });
 
 export type DaemonState = z.infer<typeof daemonStateSchema>;
@@ -32,5 +34,15 @@ export async function setActiveTabIdentifier(tabIdentifier: string): Promise<voi
 	await writeDaemonState({
 		...currentState,
 		activeTabIdentifier: tabIdentifier,
+	});
+}
+
+export async function setLastSeenWindows(
+	lastSeenWindows: Array<z.infer<typeof xcodeWindowSchema>>,
+): Promise<void> {
+	const currentState = await readDaemonState();
+	await writeDaemonState({
+		...currentState,
+		lastSeenWindows,
 	});
 }

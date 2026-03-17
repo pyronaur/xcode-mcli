@@ -125,6 +125,64 @@ test("windows list prints a stable JSON envelope", async () => {
 	}
 });
 
+test("windows list caches the last seen windows in daemon state", async () => {
+	const environment = await createFakeXcrunEnvironment({
+		tools: [
+			{
+				name: "XcodeListWindows",
+				description: "List windows.",
+				inputSchema: {
+					type: "object",
+					properties: {},
+				},
+			},
+		],
+		callResults: {
+			XcodeListWindows: {
+				content: [
+					{
+						type: "text",
+						text: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
+					},
+				],
+				structuredContent: {
+					windows: [
+						{
+							tabIdentifier: "windowtab1",
+							workspacePath: "/tmp/Countdown.xcworkspace",
+						},
+					],
+				},
+			},
+		},
+	});
+	process.env.XCODE_MCLI_STATE_ROOT = environment.stateRoot;
+	process.env.XCODE_MCLI_XCRUN_PATH = environment.xcrunPath;
+	try {
+		await captureConsoleLogs(async () => {
+			await runXcodeMcli(["windows", "list"], process.cwd());
+		});
+		const state = JSON.parse(
+			await readFile(join(environment.stateRoot, "state.json"), "utf8"),
+		) as {
+			lastSeenWindows?: Array<{
+				tabIdentifier: string;
+				workspacePath: string;
+			}>;
+		};
+		expect(state.lastSeenWindows).toEqual([
+			{
+				tabIdentifier: "windowtab1",
+				workspacePath: "/tmp/Countdown.xcworkspace",
+			},
+		]);
+	} finally {
+		await runXcodeMcli(["daemon", "stop"], process.cwd());
+		delete process.env.XCODE_MCLI_STATE_ROOT;
+		delete process.env.XCODE_MCLI_XCRUN_PATH;
+	}
+});
+
 test("windows list normalizes wrapped message text into structured windows", async () => {
 	const environment = await createFakeXcrunEnvironment({
 		tools: [

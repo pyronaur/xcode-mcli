@@ -1,6 +1,10 @@
 import { runtimeError } from "../core/errors.ts";
 import { callDaemonTool } from "./daemon-host.ts";
-import { readDaemonState, setActiveTabIdentifier } from "./daemon-state.ts";
+import {
+	readDaemonState,
+	setActiveTabIdentifier,
+	setLastSeenWindows,
+} from "./daemon-state.ts";
 import { readWindowsFromToolResult, xcodeWindowsToolResultSchema } from "./xcode-windows.ts";
 
 export async function resolveTabIdentifier(input: {
@@ -22,6 +26,7 @@ export async function resolveTabIdentifier(input: {
 		}),
 	);
 	const windows = readWindowsFromToolResult(result);
+	await setLastSeenWindows(windows);
 	if (windows.length === 1) {
 		const firstWindow = windows[0];
 		if (!firstWindow) {
