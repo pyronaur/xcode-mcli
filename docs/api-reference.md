@@ -125,6 +125,7 @@ Flags:
 
 - `--query <text>` required
 - `--framework <name>` repeatable
+- `--tab-identifier <id>` optional and ignored by the v1 resolver
 - `--json`
 - `--verbose`
 

@@ -31,6 +31,22 @@ test.each([
 		},
 	},
 	{
+		name: "docs search accepts tab selection without forwarding it",
+		args: [
+			"docs",
+			"search",
+			"--query",
+			"SwiftUI",
+			"--tab-identifier",
+			"windowtab1",
+		],
+		tool: "DocumentationSearch",
+		expectedArguments: {
+			query: "SwiftUI",
+			frameworks: [],
+		},
+	},
+	{
 		name: "build log forwards filters and tab identifier",
 		args: [
 			"build",
