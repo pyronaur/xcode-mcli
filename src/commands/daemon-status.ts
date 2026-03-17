@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { defineCommand } from "../core/command-definition.ts";
-import { readDaemonStatus } from "../runtime/daemon-status.ts";
+import { readDaemonStatus } from "../runtime/daemon-host.ts";
 
 export const daemonStatusCommand = defineCommand({
 	path: ["daemon", "status"],

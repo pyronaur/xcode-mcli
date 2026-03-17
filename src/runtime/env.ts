@@ -20,6 +20,14 @@ export function resolveDaemonPidFilePath(): string {
 	return join(resolveStateRoot(), "daemon.pid");
 }
 
+export function resolveDaemonSocketPath(): string {
+	return join(resolveStateRoot(), "daemon.sock");
+}
+
+export function resolveDaemonLogFilePath(): string {
+	return join(resolveStateRoot(), "daemon.log");
+}
+
 export function resolveXcrunPath(): string {
 	const override = process.env[XCRUN_PATH_ENV_NAME]?.trim();
 	if (override) {
