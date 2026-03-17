@@ -5,7 +5,11 @@ import { z } from "zod";
 import { defineCommand } from "../core/command-definition.ts";
 import { runtimeError } from "../core/errors.ts";
 import { callDaemonTool } from "../runtime/daemon-host.ts";
-import { printCommandResult, toCommandData } from "../runtime/output.ts";
+import {
+	printCommandResult,
+	printVerboseTool,
+	toCommandData,
+} from "../runtime/output.ts";
 import { resolveTabIdentifier } from "../runtime/tab-resolver.ts";
 
 type ToolCommandResult = {
@@ -123,6 +127,7 @@ export function createToolCommand<TOptions>(input: ToolCommandDefinitionInput<TO
 					explicitTabIdentifier: readTabIdentifierOption(options),
 				});
 			}
+			printVerboseTool(globals, input.toolName);
 			const result = toolCommandResultSchema.parse(
 				await callDaemonTool({
 					name: input.toolName,

@@ -293,11 +293,12 @@ export async function startDaemon(): Promise<DaemonStatus> {
 	}
 	await mkdir(resolveStateRoot(), { recursive: true });
 	const logFile = openSync(resolveDaemonLogFilePath(), "a");
-	spawn(process.execPath, [daemonEntryPath], {
+	const child = spawn(process.execPath, [daemonEntryPath], {
 		detached: true,
 		env: process.env,
 		stdio: ["ignore", logFile, logFile],
 	});
+	child.unref();
 	return waitForDaemonReady();
 }
 

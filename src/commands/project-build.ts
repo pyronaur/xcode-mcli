@@ -2,7 +2,11 @@ import { z } from "zod";
 
 import { defineCommand } from "../core/command-definition.ts";
 import { callDaemonTool } from "../runtime/daemon-host.ts";
-import { printCommandResult, toCommandData } from "../runtime/output.ts";
+import {
+	printCommandResult,
+	printVerboseTool,
+	toCommandData,
+} from "../runtime/output.ts";
 import { resolveTabIdentifier } from "../runtime/tab-resolver.ts";
 
 const projectBuildOptionsSchema = z.object({
@@ -24,6 +28,7 @@ export const projectBuildCommand = defineCommand({
 		const tabIdentifier = await resolveTabIdentifier({
 			explicitTabIdentifier: options.tabIdentifier,
 		});
+		printVerboseTool(globals, "BuildProject");
 		const result = projectBuildResultSchema.parse(
 			await callDaemonTool({
 				name: "BuildProject",

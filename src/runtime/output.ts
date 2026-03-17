@@ -81,6 +81,13 @@ export function toCommandData(input: {
 	return {};
 }
 
+export function printVerboseTool(globals: GlobalOptions, toolName: string): void {
+	if (!globals.verbose) {
+		return;
+	}
+	console.error(`Xcode MCP tool: ${toolName}`);
+}
+
 export function printCommandResult(input: CommandResultInput): void {
 	if (input.globals.json) {
 		console.log(JSON.stringify(toJsonSuccessEnvelope(input)));
