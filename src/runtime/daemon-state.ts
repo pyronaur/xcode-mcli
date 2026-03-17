@@ -10,8 +10,10 @@ import { xcodeWindowSchema } from "./xcode-windows.ts";
 
 const daemonStateSchema = z.object({
 	activeTabIdentifier: z.string().trim().min(1).optional(),
+	bridgeProcessId: z.number().int().positive().optional(),
 	cachedTools: z.array(xcodeToolDefinitionSchema).optional(),
 	lastSeenWindows: z.array(xcodeWindowSchema).optional(),
+	lastXcodeConnectionSucceeded: z.boolean().optional(),
 });
 
 export type DaemonState = z.infer<typeof daemonStateSchema>;
@@ -57,5 +59,17 @@ export async function setCachedTools(cachedTools: XcodeToolDefinition[]): Promis
 	await writeDaemonState({
 		...currentState,
 		cachedTools,
+	});
+}
+
+export async function setBridgeConnectionState(input: {
+	bridgeProcessId?: number;
+	lastXcodeConnectionSucceeded: boolean;
+}): Promise<void> {
+	const currentState = await readDaemonState();
+	await writeDaemonState({
+		...currentState,
+		bridgeProcessId: input.bridgeProcessId,
+		lastXcodeConnectionSucceeded: input.lastXcodeConnectionSucceeded,
 	});
 }

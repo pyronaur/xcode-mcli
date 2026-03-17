@@ -270,6 +270,58 @@ test("windows list caches the current Xcode tool list in daemon state", async ()
 	}
 });
 
+test("windows list records the active bridge process and successful Xcode connection", async () => {
+	const environment = await createFakeXcrunEnvironment({
+		tools: [
+			{
+				name: "XcodeListWindows",
+				description: "List windows.",
+				inputSchema: {
+					type: "object",
+					properties: {},
+				},
+			},
+		],
+		callResults: {
+			XcodeListWindows: {
+				content: [
+					{
+						type: "text",
+						text: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
+					},
+				],
+				structuredContent: {
+					windows: [
+						{
+							tabIdentifier: "windowtab1",
+							workspacePath: "/tmp/Countdown.xcworkspace",
+						},
+					],
+				},
+			},
+		},
+	});
+	process.env.XCODE_MCLI_STATE_ROOT = environment.stateRoot;
+	process.env.XCODE_MCLI_XCRUN_PATH = environment.xcrunPath;
+	try {
+		await captureConsoleLogs(async () => {
+			await runXcodeMcli(["windows", "list"], process.cwd());
+		});
+		const state = JSON.parse(
+			await readFile(join(environment.stateRoot, "state.json"), "utf8"),
+		) as {
+			bridgeProcessId?: number;
+			lastXcodeConnectionSucceeded?: boolean;
+		};
+		expect(state.bridgeProcessId).toEqual(expect.any(Number));
+		expect(state.lastXcodeConnectionSucceeded).toBe(true);
+	} finally {
+		await runXcodeMcli(["daemon", "stop"], process.cwd());
+		delete process.env.XCODE_MCLI_STATE_ROOT;
+		delete process.env.XCODE_MCLI_XCRUN_PATH;
+	}
+});
+
 test("windows list normalizes wrapped message text into structured windows", async () => {
 	const environment = await createFakeXcrunEnvironment({
 		tools: [

@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
 import { runtimeError } from "../core/errors.ts";
-import { setCachedTools } from "./daemon-state.ts";
+import { setBridgeConnectionState, setCachedTools } from "./daemon-state.ts";
 import {
 	resolveDaemonLogFilePath,
 	resolveDaemonPidFilePath,
@@ -276,6 +276,10 @@ async function readOrCreateBridgeClient(): Promise<
 		return bridgeClient;
 	}
 	bridgeClient = await createXcodeBridgeClient();
+	await setBridgeConnectionState({
+		bridgeProcessId: bridgeClient.bridgeProcessId,
+		lastXcodeConnectionSucceeded: true,
+	});
 	await setCachedTools(await bridgeClient.listTools());
 	return bridgeClient;
 }

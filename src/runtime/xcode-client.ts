@@ -15,6 +15,7 @@ type XcodeToolCallResult = {
 };
 
 type XcodeBridgeClient = {
+	bridgeProcessId?: number;
 	callTool(
 		input: { arguments: Record<string, unknown>; name: string },
 	): Promise<XcodeToolCallResult>;
@@ -103,6 +104,7 @@ export async function createXcodeBridgeClient(): Promise<XcodeBridgeClient> {
 	await initializeClient(peer);
 	let cachedTools: XcodeToolDefinition[] | null = null;
 	return {
+		bridgeProcessId: child.pid,
 		listTools: async () => {
 			if (cachedTools) {
 				return cachedTools;
