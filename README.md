@@ -65,8 +65,23 @@ xcode-mcli --json --verbose windows list
 ## Docs
 
 - [docs/api-reference.md](docs/api-reference.md)
+- [docs/compatibility.md](docs/compatibility.md)
 - [docs/setup.md](docs/setup.md)
 - [docs/troubleshooting.md](docs/troubleshooting.md)
+
+## Compatibility
+
+Pin and verify the Xcode MCP surface with:
+
+```bash
+npm run compat:xcode-mcp:verify
+```
+
+The pinned Apple Xcode 26.3 baseline lives at:
+
+```text
+compat/xcode-mcp/apple-xcode-26.3.surface.json
+```
 
 ## Development
 

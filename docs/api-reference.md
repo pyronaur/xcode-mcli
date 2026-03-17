@@ -28,7 +28,8 @@ Failure shape:
   "tool": "XcodeRead",
   "error": {
     "kind": "runtime",
-    "message": "..."
+    "message": "...",
+    "details": {}
   }
 }
 ```
@@ -56,6 +57,40 @@ Flags:
 
 - `--json`
 - `--verbose`
+
+## Surface
+
+### `xcode-mcli surface snapshot [--output-file <path>]`
+
+Discovers the live Xcode MCP surface through `initialize`, `tools/list`, `prompts/list`, and `resources/list`.
+
+Flags:
+
+- `--output-file <path>` optional
+- `--json`
+- `--verbose`
+
+Without `--output-file`, text mode prints the canonical snapshot JSON.
+
+With `--output-file`, the command writes the normalized snapshot to disk and prints the resolved path.
+
+### `xcode-mcli surface verify --baseline-file <path>`
+
+Compares the live discovered Xcode MCP surface against a baseline snapshot file.
+
+Flags:
+
+- `--baseline-file <path>` required
+- `--json`
+- `--verbose`
+
+Success data includes:
+
+- `baselineFile`
+- `compatible`
+- `diff`
+
+Failure JSON includes categorized diff details in `error.details`.
 
 ## Daemon
 

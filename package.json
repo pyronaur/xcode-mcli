@@ -11,6 +11,9 @@
 		"node": ">=25"
 	},
 	"scripts": {
+		"compat:xcode-mcp:pin-26.3": "node ./bin/xcode-mcli.ts surface snapshot --output-file compat/xcode-mcp/apple-xcode-26.3.surface.json",
+		"compat:xcode-mcp:snapshot": "node ./bin/xcode-mcli.ts surface snapshot",
+		"compat:xcode-mcp:verify": "node ./bin/xcode-mcli.ts surface verify --baseline-file compat/xcode-mcp/apple-xcode-26.3.surface.json",
 		"lint": "npm run lint:dprint:fix && npm run lint:oxlint:fix && npm run typecheck && npm run jscpd && npm run knip",
 		"lint-dry": "npm run lint:dprint && npm run lint:oxlint && npm run typecheck && npm run jscpd && npm run knip",
 		"lint:dprint": "dprint check",

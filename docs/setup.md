@@ -98,3 +98,23 @@ xcode-mcli --json --verbose windows list
 ```
 
 `--json`, `--verbose`, and `--tab-identifier <id>` can be passed before the command path or after the specific command.
+
+## Compatibility Check
+
+Verify the pinned Apple Xcode 26.3 MCP surface:
+
+```bash
+npm run compat:xcode-mcp:verify
+```
+
+Capture the current live surface:
+
+```bash
+npm run compat:xcode-mcp:snapshot
+```
+
+Pin a canonical baseline file:
+
+```bash
+npm run compat:xcode-mcp:pin-26.3
+```
