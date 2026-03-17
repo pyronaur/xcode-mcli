@@ -9,8 +9,8 @@ async function createProgram(projectDir: string): Promise<Command> {
 	const packageVersion = await readPackageVersion();
 	const program = new Command();
 	program
-		.name("command-template")
-		.description("Reusable strict TypeScript CLI template.")
+		.name("xcode-mcli")
+		.description("Stable macOS CLI wrapper for Apple's Xcode MCP bridge.")
 		.helpOption("--help", "Display help for command.")
 		.version(packageVersion, "--version", "Show package version.")
 		.showSuggestionAfterError()
@@ -63,7 +63,7 @@ async function parseProgram(program: Command, argv: string[]): Promise<void> {
 	await program.parseAsync(argv, { from: "user" });
 }
 
-export async function runCommandTemplateCli(argv: string[], projectDir: string): Promise<void> {
+export async function runXcodeMcli(argv: string[], projectDir: string): Promise<void> {
 	const program = await createProgram(projectDir);
 	if (argv.length === 0) {
 		program.outputHelp();
@@ -76,6 +76,6 @@ export async function runCommandTemplateCli(argv: string[], projectDir: string):
 	}
 }
 
-export async function runCommandTemplateCliFromProcess(): Promise<void> {
-	await runCommandTemplateCli(process.argv.slice(2), process.cwd());
+export async function runXcodeMcliFromProcess(): Promise<void> {
+	await runXcodeMcli(process.argv.slice(2), process.cwd());
 }

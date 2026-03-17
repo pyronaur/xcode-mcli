@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { runCommandTemplateCliFromProcess } from "../src/core/command-dispatch.ts";
+import { runXcodeMcliFromProcess } from "../src/core/command-dispatch.ts";
 import { toTemplateError } from "../src/core/errors.ts";
 
 try {
-	await runCommandTemplateCliFromProcess();
+	await runXcodeMcliFromProcess();
 } catch (error) {
 	const wrapped = toTemplateError(error);
 	console.error(wrapped.message);

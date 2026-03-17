@@ -10,8 +10,8 @@ test("dispatch throws runtime error when startup lookup fails", async () => {
 		},
 	}));
 	try {
-		const { runCommandTemplateCli } = await import("../src/core/command-dispatch.ts");
-		await runCommandTemplateCli(["hello"], process.cwd());
+		const { runXcodeMcli } = await import("../src/core/command-dispatch.ts");
+		await runXcodeMcli(["setup"], process.cwd());
 		throw new Error("Expected runtime error.");
 	} catch (error) {
 		if (!(error instanceof TemplateError)) {

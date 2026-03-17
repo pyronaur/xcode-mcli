@@ -1,11 +1,11 @@
 {
-	"name": "command-template",
+	"name": "xcode-mcli",
 	"version": "0.1.0",
-	"description": "Reusable strict TypeScript CLI command template.",
+	"description": "Stable macOS CLI wrapper for Apple's Xcode MCP bridge.",
 	"type": "module",
 	"private": false,
 	"bin": {
-		"command-template": "./bin/command-template.ts"
+		"xcode-mcli": "./bin/xcode-mcli.ts"
 	},
 	"engines": {
 		"node": ">=25"

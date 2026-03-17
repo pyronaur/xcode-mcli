@@ -1,4 +1,9 @@
-import { helloCommand } from "./hello.ts";
-import { versionCommand } from "./version.ts";
+import { daemonStatusCommand } from "./daemon-status.ts";
+import { setupCommand } from "./setup.ts";
+import { windowsUseCommand } from "./windows-use.ts";
 
-export const commandDefinitions = [helloCommand, versionCommand];
+export const commandDefinitions = [
+	setupCommand,
+	daemonStatusCommand,
+	windowsUseCommand,
+];

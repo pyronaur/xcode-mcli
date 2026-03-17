@@ -14,7 +14,7 @@ test("register command supports command paths deeper than two segments", async (
 			executions.push("ran");
 		},
 	});
-	const program = new Command().name("command-template").exitOverride();
+	const program = new Command().name("xcode-mcli").exitOverride();
 	registerCommand({
 		program,
 		definition,
