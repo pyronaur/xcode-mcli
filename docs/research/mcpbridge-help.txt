@@ -1,0 +1,29 @@
+mcpbridge - STDIO Bridge for Xcode MCP Tools
+
+USAGE:
+    xcrun mcpbridge
+
+DESCRIPTION:
+    Acts as a STDIO bridge between MCP (Model Context Protocol) clients and Xcode's MCP tool service.
+    Reads JSON-RPC 2.0 messages from stdin and forwards responses to stdout.
+
+ENVIRONMENT VARIABLES:
+    MCP_XCODE_PID         Optional. The process ID of the Xcode instance to connect to.
+
+                          If not set, auto-detection uses the following fallback logic:
+                          1. If exactly one Xcode process is running, use that
+                          2. If multiple Xcode processes are running, use xcode-select
+                             to determine which Xcode is selected and connect to that
+                          3. If no Xcode processes found, exit with error
+
+    MCP_XCODE_SESSION_ID  Optional. A UUID identifying an Xcode tool session.
+
+EXAMPLES:
+    # Run with auto-detected Xcode instance
+    xcrun mcpbridge
+
+    # Run with specific Xcode PID
+    MCP_XCODE_PID=12345 xcrun mcpbridge
+
+OPTIONS:
+    -h, -help, --help     Show this help message

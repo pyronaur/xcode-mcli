@@ -1,0 +1,1 @@
+/Applications/XcodeRC.app/Contents/Developer/usr/bin/mcpbridge
