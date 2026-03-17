@@ -89,3 +89,12 @@ compelling reason. In that case:
 
 There is a strict zero percent duplication policy. Do not raise duplication
 thresholds under any circumstances without explicit user approval.
+
+## Waypoint Flow Policy
+Required: Read `~/.waypoint-flow.md` before writing code. Always keep this file in memory and re-read as soon as you forget.
+Treat `~/.waypoint-flow.md` as the authority for waypoint-flow work style and commit cadence in this repo.
+Use the `Waypoint Gate` commands as the full verification gate for each stable slice in this repo.
+Keep waypoint commits scoped to verified CLI slices, and do not include unrelated docs-only edits unless they directly support the verified slice.
+
+### Waypoint Gate
+- `make verify`
