@@ -29,6 +29,8 @@ Verify the bridge and initialize the local state root:
 xcode-mcli setup
 ```
 
+If `setup` reports `Failed to call xcrun mcpbridge --help.`, enable `Xcode Tools` in `Settings > Intelligence` and run `xcode-mcli setup` again.
+
 Then confirm Xcode access:
 
 ```bash

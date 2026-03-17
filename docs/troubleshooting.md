@@ -14,6 +14,11 @@ If it fails with `Failed to locate xcrun mcpbridge.`:
 - confirm `Xcode Tools` is enabled in `Settings > Intelligence`
 - confirm `xcrun` resolves from your shell
 
+If it fails with `Failed to call xcrun mcpbridge --help.`:
+
+- enable `Xcode Tools` in `Settings > Intelligence`
+- run `xcode-mcli setup` again
+
 ## `windows list` returns no useful workspace
 
 Make sure Xcode is open with a workspace or project window.

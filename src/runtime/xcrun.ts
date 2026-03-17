@@ -5,6 +5,7 @@ import { runtimeError } from "../core/errors.ts";
 import { resolveXcrunPath } from "./env.ts";
 
 const execFile = promisify(execFileCallback);
+const XCODE_TOOLS_GUIDANCE = "Enable Xcode Tools in Settings > Intelligence.";
 
 function toXcrunRuntimeError(error: unknown, message: string) {
 	if (error instanceof Error) {
@@ -30,6 +31,9 @@ export async function verifyMcpbridgeHelp(): Promise<void> {
 	try {
 		await execFile(resolveXcrunPath(), ["mcpbridge", "--help"]);
 	} catch (error) {
-		throw toXcrunRuntimeError(error, "Failed to call xcrun mcpbridge --help.");
+		throw toXcrunRuntimeError(
+			error,
+			`Failed to call xcrun mcpbridge --help. ${XCODE_TOOLS_GUIDANCE}`,
+		);
 	}
 }
