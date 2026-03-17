@@ -2,10 +2,15 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { z } from "zod";
 
 import { resolveStateFilePath, resolveStateRoot } from "./env.ts";
+import {
+	type XcodeToolDefinition,
+	xcodeToolDefinitionSchema,
+} from "./xcode-tool-definition.ts";
 import { xcodeWindowSchema } from "./xcode-windows.ts";
 
 const daemonStateSchema = z.object({
 	activeTabIdentifier: z.string().trim().min(1).optional(),
+	cachedTools: z.array(xcodeToolDefinitionSchema).optional(),
 	lastSeenWindows: z.array(xcodeWindowSchema).optional(),
 });
 
@@ -44,5 +49,13 @@ export async function setLastSeenWindows(
 	await writeDaemonState({
 		...currentState,
 		lastSeenWindows,
+	});
+}
+
+export async function setCachedTools(cachedTools: XcodeToolDefinition[]): Promise<void> {
+	const currentState = await readDaemonState();
+	await writeDaemonState({
+		...currentState,
+		cachedTools,
 	});
 }

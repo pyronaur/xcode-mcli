@@ -4,13 +4,8 @@ import { z } from "zod";
 import { runtimeError } from "../core/errors.ts";
 import { resolveXcrunPath } from "./env.ts";
 import { JsonRpcPeer } from "./mcp-jsonrpc.ts";
+import { type XcodeToolDefinition, xcodeToolDefinitionSchema } from "./xcode-tool-definition.ts";
 import { normalizeXcodeToolText } from "./xcode-windows.ts";
-
-type XcodeToolDefinition = {
-	description?: string;
-	inputSchema?: Record<string, unknown>;
-	name: string;
-};
 
 type XcodeToolCallResult = {
 	content: Array<Record<string, unknown>>;
@@ -30,19 +25,6 @@ type XcodeBridgeClient = {
 const MCP_PROTOCOL_VERSION = "2025-06-18";
 const initializeResultSchema = z.object({
 	protocolVersion: z.string().min(1),
-});
-const toolDefinitionSchema = z.object({
-	name: z.string().min(1),
-	description: z.string().optional(),
-	inputSchema: z.record(z.string(), z.unknown()).optional(),
-});
-const listToolsResultSchema = z.object({
-	tools: z.array(toolDefinitionSchema).default([]),
-});
-const toolCallResultSchema = z.object({
-	content: z.array(z.record(z.string(), z.unknown())).default([]),
-	isError: z.boolean().default(false),
-	structuredContent: z.unknown().optional(),
 });
 
 function readTextContent(content: Array<Record<string, unknown>>): string {
@@ -102,6 +84,15 @@ async function initializeClient(peer: JsonRpcPeer): Promise<void> {
 	}
 	peer.notify("notifications/initialized", {});
 }
+
+const listToolsResultSchema = z.object({
+	tools: z.array(xcodeToolDefinitionSchema).default([]),
+});
+const toolCallResultSchema = z.object({
+	content: z.array(z.record(z.string(), z.unknown())).default([]),
+	isError: z.boolean().default(false),
+	structuredContent: z.unknown().optional(),
+});
 
 export async function createXcodeBridgeClient(): Promise<XcodeBridgeClient> {
 	const child = spawn(resolveXcrunPath(), ["mcpbridge"], {
