@@ -259,7 +259,7 @@ Mark a slice complete only after its current implementation passes `make verify`
 - [x] Slice 19: Mutating Files Path Part 2
 - [x] Slice 20: Mutating Files Path Part 3
 - [x] Slice 21: Final Documentation Contract
-- [ ] Slice 22: Live Real-Xcode Validation
+- [x] Slice 22: Live Real-Xcode Validation
 
 ### Slice 1: Rebase Template Identity Into `xcode-mcli`
 
@@ -763,7 +763,7 @@ HITL reason:
 - [x] Validate `windows list` against a real workspace.
 - [x] Validate one read-only file command against a real workspace.
 - [x] Validate one project or test command against a real workspace if feasible.
-- [ ] Validate one mutating command only if it can be done safely in a disposable surface.
+- [x] Validate one mutating command only if it can be done safely in a disposable surface.
 
 ## Recommended Execution Order
 

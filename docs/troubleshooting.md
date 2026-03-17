@@ -107,6 +107,20 @@ Example:
 xcode-mcli files write --tab-identifier windowtab1 --file-path App/Main.swift --content 'let x = 1' --yes
 ```
 
+## `files mkdir` or other mutating commands fail with an Xcode tool error
+
+Some Xcode mutating tools depend on project structure resolution inside the active workspace.
+
+If `files mkdir` reports a message telling you to run `XcodeLS` first, warm the structure with:
+
+```bash
+xcode-mcli files ls --path .
+```
+
+Then retry the mutating command against a path inside an existing project-recognized subtree.
+
+If Xcode returns a group-resolution failure for a path that is not already represented in the project structure, use a disposable path under an existing group such as a known source folder.
+
 ## Inspecting daemon state
 
 The default state root is:
