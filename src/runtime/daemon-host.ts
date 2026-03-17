@@ -55,6 +55,8 @@ export type DaemonStatus =
 	};
 
 const daemonEntryPath = fileURLToPath(new URL("./daemon-host-entry.ts", import.meta.url));
+const DAEMON_PING_TIMEOUT_MS = 100;
+const DAEMON_TOOL_CONNECT_TIMEOUT_MS = 500;
 const daemonRequestSchema = z.discriminatedUnion("kind", [
 	z.object({
 		id: z.number().int(),
@@ -168,8 +170,20 @@ async function sendDaemonRequest(request: DaemonRequest): Promise<DaemonResponse
 	return new Promise((resolve, reject) => {
 		const socket = net.createConnection(socketPath);
 		let buffer = "";
+		const connectTimeoutMs = request.kind === "callTool"
+			? DAEMON_TOOL_CONNECT_TIMEOUT_MS
+			: DAEMON_PING_TIMEOUT_MS;
+		const timeout = setTimeout(() => {
+			socket.destroy();
+			reject(runtimeError("Timed out while contacting daemon."));
+		}, connectTimeoutMs);
+		const settle = (callback: () => void) => {
+			clearTimeout(timeout);
+			callback();
+		};
 		socket.setEncoding("utf8");
 		socket.on("connect", () => {
+			clearTimeout(timeout);
 			socket.write(`${JSON.stringify(request)}\n`);
 		});
 		socket.on("data", (chunk) => {
@@ -179,10 +193,14 @@ async function sendDaemonRequest(request: DaemonRequest): Promise<DaemonResponse
 				return;
 			}
 			socket.end();
-			resolve(daemonResponseSchema.parse(JSON.parse(line)));
+			settle(() => {
+				resolve(daemonResponseSchema.parse(JSON.parse(line)));
+			});
 		});
 		socket.on("error", (error) => {
-			reject(runtimeError(`Failed to contact daemon. ${error.message}`));
+			settle(() => {
+				reject(runtimeError(`Failed to contact daemon. ${error.message}`));
+			});
 		});
 	});
 }
@@ -198,11 +216,15 @@ async function waitForDaemonReady(): Promise<DaemonStatus> {
 	throw runtimeError("Timed out while starting the daemon.");
 }
 
-async function waitForDaemonExit(): Promise<void> {
+async function waitForProcessExit(pid: number): Promise<void> {
 	for (let attempt = 0; attempt < 40; attempt += 1) {
-		const status = await readDaemonStatus();
-		if (!status.running) {
-			return;
+		try {
+			process.kill(pid, 0);
+		} catch (error) {
+			if (error instanceof Error && "code" in error && error.code === "ESRCH") {
+				return;
+			}
+			throw error;
 		}
 		await delay(50);
 	}
@@ -284,11 +306,13 @@ export async function stopDaemon(): Promise<void> {
 	if (!status.running) {
 		return;
 	}
-	await sendDaemonRequest({
-		id: 1,
-		kind: "stop",
-	});
-	await waitForDaemonExit();
+	process.kill(status.pid, "SIGTERM");
+	await waitForProcessExit(status.pid);
+}
+
+export async function restartDaemon(): Promise<DaemonStatus> {
+	await stopDaemon();
+	return startDaemon();
 }
 
 export async function runDaemonHost(): Promise<void> {

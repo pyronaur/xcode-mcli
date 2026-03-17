@@ -1,4 +1,5 @@
 import type { CommandDefinition } from "../core/contracts.ts";
+import { daemonRestartCommand } from "./daemon-restart.ts";
 import { daemonStartCommand } from "./daemon-start.ts";
 import { daemonStatusCommand } from "./daemon-status.ts";
 import { daemonStopCommand } from "./daemon-stop.ts";
@@ -11,6 +12,7 @@ import { xcodeToolCommandDefinitions } from "./xcode-tool-commands.ts";
 export const commandDefinitions: CommandDefinition[] = [
 	setupCommand,
 	daemonStartCommand,
+	daemonRestartCommand,
 	daemonStatusCommand,
 	daemonStopCommand,
 	projectBuildCommand,
