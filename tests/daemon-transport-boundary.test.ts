@@ -156,3 +156,48 @@ test("cli returns a runtime error when the daemon closes the socket without a re
 		});
 	});
 });
+
+test("cli waits for a slow daemon tool reply after the socket connects", async () => {
+	await withFakeDaemon(async (socket, request) => {
+		if (request.kind === "ping") {
+			writeDaemonResponse(socket, {
+				id: request.id,
+				ok: true,
+				running: true,
+				pid: process.pid,
+			});
+			return;
+		}
+		if (request.kind !== "callTool") {
+			return;
+		}
+		await new Promise((resolve) => {
+			setTimeout(resolve, 700);
+		});
+		writeDaemonResponse(socket, {
+			id: request.id,
+			ok: true,
+			running: true,
+			result: {
+				text: "slow success",
+			},
+		});
+	}, async ({ stateRoot }) => {
+		const result = await runCliProcess({
+			args: ["docs", "search", "--query", "NavigationPath", "--json"],
+			env: {
+				XCODE_MCLI_STATE_ROOT: stateRoot,
+			},
+		});
+		expect(result.exitCode).toBe(0);
+		expect(result.stderr).toBe("");
+		expect(JSON.parse(result.stdout)).toEqual({
+			ok: true,
+			command: "docs search",
+			tool: "DocumentationSearch",
+			data: {
+				text: "slow success",
+			},
+		});
+	});
+});

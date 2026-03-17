@@ -56,7 +56,7 @@ export type DaemonStatus =
 	};
 
 const daemonEntryPath = fileURLToPath(new URL("./daemon-host-entry.ts", import.meta.url));
-const DAEMON_PING_TIMEOUT_MS = 100;
+const DAEMON_PING_CONNECT_TIMEOUT_MS = 100;
 const DAEMON_TOOL_CONNECT_TIMEOUT_MS = 500;
 const daemonRequestSchema = z.discriminatedUnion("kind", [
 	z.object({
@@ -233,7 +233,7 @@ async function sendDaemonRequest(request: DaemonRequest): Promise<DaemonResponse
 		let settled = false;
 		const connectTimeoutMs = request.kind === "callTool"
 			? DAEMON_TOOL_CONNECT_TIMEOUT_MS
-			: DAEMON_PING_TIMEOUT_MS;
+			: DAEMON_PING_CONNECT_TIMEOUT_MS;
 		const timeout = setTimeout(() => {
 			settle(() => {
 				socket.destroy();
@@ -250,6 +250,7 @@ async function sendDaemonRequest(request: DaemonRequest): Promise<DaemonResponse
 		};
 		socket.setEncoding("utf8");
 		socket.on("connect", () => {
+			clearTimeout(timeout);
 			socket.write(`${JSON.stringify(request)}\n`);
 		});
 		socket.on("data", (chunk) => {
