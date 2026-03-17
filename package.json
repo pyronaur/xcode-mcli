@@ -20,7 +20,7 @@
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"jscpd": "jscpd --config .jscpd.json",
 		"knip": "knip",
-		"test": "vitest run"
+		"test": "vitest run --maxWorkers 1 --fileParallelism false"
 	},
 	"dependencies": {
 		"commander": "^14.0.1",

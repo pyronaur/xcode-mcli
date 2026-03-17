@@ -1,0 +1,70 @@
+import { expect, test } from "vitest";
+
+import { runXcodeMcli } from "../src/core/command-dispatch.ts";
+import { captureConsoleLogs } from "./helpers/console.ts";
+import { createFakeXcrunEnvironment } from "./helpers/fake-xcrun.ts";
+
+test("project build auto-resolves the single Xcode window tab before calling BuildProject", async () => {
+	const environment = await createFakeXcrunEnvironment({
+		tools: [
+			{
+				name: "XcodeListWindows",
+				description: "List windows.",
+				inputSchema: {
+					type: "object",
+					properties: {},
+				},
+			},
+			{
+				name: "BuildProject",
+				description: "Build project.",
+				inputSchema: {
+					type: "object",
+					properties: {
+						tabIdentifier: {
+							type: "string",
+						},
+					},
+				},
+			},
+		],
+		callResults: {
+			XcodeListWindows: {
+				content: [
+					{
+						type: "text",
+						text: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
+					},
+				],
+				structuredContent: {
+					windows: [
+						{
+							tabIdentifier: "windowtab1",
+							workspacePath: "/tmp/Countdown.xcworkspace",
+						},
+					],
+				},
+			},
+			BuildProject: {
+				content: [
+					{
+						type: "text",
+						text: "Build succeeded.\n",
+					},
+				],
+			},
+		},
+	});
+	process.env.XCODE_MCLI_STATE_ROOT = environment.stateRoot;
+	process.env.XCODE_MCLI_XCRUN_PATH = environment.xcrunPath;
+	try {
+		const lines = await captureConsoleLogs(async () => {
+			await runXcodeMcli(["project", "build"], process.cwd());
+		});
+		expect(lines).toEqual(["Build succeeded."]);
+	} finally {
+		await runXcodeMcli(["daemon", "stop"], process.cwd());
+		delete process.env.XCODE_MCLI_STATE_ROOT;
+		delete process.env.XCODE_MCLI_XCRUN_PATH;
+	}
+});

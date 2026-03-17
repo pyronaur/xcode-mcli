@@ -52,6 +52,12 @@ for await (const line of rl) {
 		continue;
 	}
 	if (message.method === "tools/call") {
+		if (scenario.eventLogPath) {
+			await appendFile(
+				scenario.eventLogPath,
+				`call:${message.params?.name}:${JSON.stringify(message.params?.arguments ?? {})}\n`,
+			);
+		}
 		const result = scenario.callResults?.[message.params?.name];
 		if (!result) {
 			writeError(message.id, -32000, `Unknown tool: ${message.params?.name}`);

@@ -12,11 +12,18 @@ import {
 	resolveDaemonSocketPath,
 	resolveStateRoot,
 } from "./env.ts";
+import { createXcodeBridgeClient } from "./xcode-client.ts";
 
 type DaemonRequest =
 	| {
 		id: number;
 		kind: "ping";
+	}
+	| {
+		arguments: Record<string, unknown>;
+		id: number;
+		kind: "callTool";
+		name: string;
 	}
 	| {
 		id: number;
@@ -28,7 +35,8 @@ type DaemonResponse =
 		id: number;
 		ok: true;
 		pid?: number;
-		running: boolean;
+		result?: unknown;
+		running?: boolean;
 		stopped?: boolean;
 	}
 	| {
@@ -54,6 +62,12 @@ const daemonRequestSchema = z.discriminatedUnion("kind", [
 	}),
 	z.object({
 		id: z.number().int(),
+		kind: z.literal("callTool"),
+		name: z.string().min(1),
+		arguments: z.record(z.string(), z.unknown()),
+	}),
+	z.object({
+		id: z.number().int(),
 		kind: z.literal("stop"),
 	}),
 ]);
@@ -61,8 +75,9 @@ const daemonResponseSchema = z.union([
 	z.object({
 		id: z.number().int(),
 		ok: z.literal(true),
-		running: z.boolean(),
+		running: z.boolean().optional(),
 		pid: z.number().int().optional(),
+		result: z.unknown().optional(),
 		stopped: z.boolean().optional(),
 	}),
 	z.object({
@@ -71,6 +86,7 @@ const daemonResponseSchema = z.union([
 		error: z.string().min(1),
 	}),
 ]);
+let bridgeClient: Awaited<ReturnType<typeof createXcodeBridgeClient>> | null = null;
 
 async function bindDaemonCleanup(server: net.Server): Promise<void> {
 	const cleanup = async () => {
@@ -107,7 +123,25 @@ async function handleDaemonRequest(
 		});
 		return;
 	}
+	if (request.kind === "callTool") {
+		const client = await readOrCreateBridgeClient();
+		const result = await client.callTool({
+			name: request.name,
+			arguments: request.arguments,
+		});
+		writeDaemonResponse(socket, {
+			id: request.id,
+			ok: true,
+			result,
+			running: true,
+		});
+		return;
+	}
 	if (request.kind === "stop") {
+		if (bridgeClient) {
+			await bridgeClient.close();
+			bridgeClient = null;
+		}
 		writeDaemonResponse(socket, {
 			id: request.id,
 			ok: true,
@@ -175,10 +209,37 @@ async function waitForDaemonExit(): Promise<void> {
 	throw runtimeError("Timed out while stopping the daemon.");
 }
 
+async function readOrCreateBridgeClient(): Promise<
+	Awaited<ReturnType<typeof createXcodeBridgeClient>>
+> {
+	if (bridgeClient) {
+		return bridgeClient;
+	}
+	bridgeClient = await createXcodeBridgeClient();
+	return bridgeClient;
+}
+
 async function delay(ms: number): Promise<void> {
 	await new Promise((resolve) => {
 		setTimeout(resolve, ms);
 	});
+}
+
+export async function callDaemonTool(input: {
+	arguments: Record<string, unknown>;
+	name: string;
+}): Promise<unknown> {
+	await startDaemon();
+	const response = await sendDaemonRequest({
+		id: 1,
+		kind: "callTool",
+		name: input.name,
+		arguments: input.arguments,
+	});
+	if (response.ok) {
+		return response.result;
+	}
+	throw runtimeError(response.error);
 }
 
 export async function readDaemonStatus(): Promise<DaemonStatus> {
