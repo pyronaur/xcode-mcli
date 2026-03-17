@@ -16,6 +16,7 @@ const windowsListResultSchema = z.object({
 export const windowsListCommand = defineCommand({
 	path: ["windows", "list"],
 	description: "List open Xcode windows.",
+	toolName: "XcodeListWindows",
 	optionsSchema: z.object({}),
 	run: async ({ commandPath, globals }) => {
 		printVerboseTool(globals, "XcodeListWindows");

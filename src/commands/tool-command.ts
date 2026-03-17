@@ -118,6 +118,7 @@ export function createToolCommand<TOptions>(input: ToolCommandDefinitionInput<TO
 	return defineCommand({
 		path: input.path,
 		description: input.description,
+		toolName: input.toolName,
 		configure: input.configure,
 		optionsSchema: input.optionsSchema,
 		run: async ({ commandPath, globals, options }) => {

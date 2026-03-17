@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { output, ZodType } from "zod";
 
 import type { CommandDefinition } from "./contracts.ts";
-import { runtimeError, usageError } from "./errors.ts";
+import { attachCommandMetadata, runtimeError, usageError } from "./errors.ts";
 
 function commandPathToString(path: readonly string[]): string {
 	return path.join(" ");
@@ -59,12 +59,19 @@ function registerCommandAction<TSchema extends ZodType>(input: {
 			input.definition.optionsSchema,
 			command.optsWithGlobals(),
 		);
-		await input.definition.run({
-			commandPath: input.definition.path,
-			globals: readGlobalOptions(command),
-			projectDir: input.projectDir,
-			options: parsedOptions,
-		});
+		try {
+			await input.definition.run({
+				commandPath: input.definition.path,
+				globals: readGlobalOptions(command),
+				projectDir: input.projectDir,
+				options: parsedOptions,
+			});
+		} catch (error) {
+			throw attachCommandMetadata(error, {
+				commandName: commandPathToString(input.definition.path),
+				toolName: input.definition.toolName,
+			});
+		}
 	});
 }
 

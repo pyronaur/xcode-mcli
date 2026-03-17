@@ -20,6 +20,7 @@ const projectBuildResultSchema = z.object({
 export const projectBuildCommand = defineCommand({
 	path: ["project", "build"],
 	description: "Build the active Xcode project.",
+	toolName: "BuildProject",
 	configure: (command) => {
 		command.option("--tab-identifier <id>", "Active Xcode window tab identifier.");
 	},

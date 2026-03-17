@@ -20,5 +20,6 @@ export type CommandDefinition<TSchema extends ZodType = ZodType> = {
 	description: string;
 	configure?: (command: Command) => void;
 	optionsSchema: TSchema;
+	toolName?: string;
 	run: (context: CommandRunContext<output<TSchema>>) => Promise<void>;
 };

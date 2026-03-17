@@ -116,7 +116,8 @@ export function printCommandError(input: CommandErrorInput): void {
 	console.log(
 		JSON.stringify({
 			ok: false,
-			command: readCommandNameFromArgv(input.argv),
+			command: input.error.commandName ?? readCommandNameFromArgv(input.argv),
+			tool: input.error.toolName,
 			error: {
 				kind: readErrorKind(input.error),
 				message: input.error.message,

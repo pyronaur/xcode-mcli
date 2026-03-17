@@ -24,7 +24,8 @@ Failure shape:
 ```json
 {
   "ok": false,
-  "command": "setup",
+  "command": "files read",
+  "tool": "XcodeRead",
   "error": {
     "kind": "runtime",
     "message": "..."

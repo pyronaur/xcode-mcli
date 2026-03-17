@@ -161,6 +161,43 @@ async function handleDaemonRequest(
 	}
 }
 
+function readDaemonRequestId(line: string): number | null {
+	try {
+		const parsed = JSON.parse(line);
+		return typeof parsed.id === "number" ? parsed.id : null;
+	} catch {
+		return null;
+	}
+}
+
+function toDaemonErrorMessage(error: unknown): string {
+	if (error instanceof Error && error.message.trim().length > 0) {
+		return error.message;
+	}
+	return String(error);
+}
+
+async function handleDaemonRequestSafely(
+	server: net.Server,
+	socket: net.Socket,
+	line: string,
+): Promise<void> {
+	try {
+		await handleDaemonRequest(server, socket, line);
+	} catch (error) {
+		const id = readDaemonRequestId(line);
+		if (id === null) {
+			socket.destroy();
+			return;
+		}
+		writeDaemonResponse(socket, {
+			id,
+			ok: false,
+			error: toDaemonErrorMessage(error),
+		});
+	}
+}
+
 function writeDaemonResponse(socket: net.Socket, response: DaemonResponse): void {
 	socket.write(`${JSON.stringify(response)}\n`);
 }
@@ -331,7 +368,7 @@ export async function runDaemonHost(): Promise<void> {
 				if (line.trim().length === 0) {
 					continue;
 				}
-				void handleDaemonRequest(server, socket, line);
+				void handleDaemonRequestSafely(server, socket, line);
 			}
 		});
 	});
