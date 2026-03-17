@@ -1,92 +1,75 @@
-# command-template
+# xcode-mcli
 
-Reusable strict TypeScript CLI template for npm packages.
+`xcode-mcli` is a macOS CLI for Apple's Xcode MCP bridge exposed through `xcrun mcpbridge`.
 
-## Features
+It gives you a daemon-backed terminal interface to the current Xcode MCP tool surface without registering Xcode MCP inside Codex or another MCP client.
 
-- Node 25 + npm + ESM TypeScript setup.
-- Strict lint/typecheck/duplication/unused checks.
-- Commander-based CLI parsing with native help and version flags.
-- Shared Zod option contracts with inferred handler types.
-- Path-based command definitions supporting flexible depth.
-- Starter commands: `hello` and `project version`.
+## Requirements
 
-## Prerequisites
+- macOS
+- Xcode with `Xcode Tools` enabled in `Settings > Intelligence`
+- Node.js 25+
 
-- Node.js 25 or newer
-- npm
-
-Install dependencies:
+## Install
 
 ```bash
 npm install
 ```
 
-## Commands
+For a global install:
 
 ```bash
-command-template hello [--name <name>]
-command-template project version
-command-template --version
+npm install -g xcode-mcli
 ```
 
-Examples:
+## Quick Start
 
 ```bash
-command-template hello
-command-template hello --name Ada
-command-template project version
+xcode-mcli setup
+xcode-mcli windows list
+xcode-mcli windows use --tab-identifier windowtab1
+xcode-mcli files read --tab-identifier windowtab1 --file-path App/Main.swift
+xcode-mcli project build --tab-identifier windowtab1
 ```
 
-## Development Commands
+The daemon auto-starts on the first daemon-backed command.
+
+## Output Modes
+
+- Default output is concise text.
+- `--json` prints a stable wrapper envelope.
+- `--verbose` prints the exact Xcode MCP tool name to `stderr` for tool-backed commands.
+
+Example:
+
+```bash
+xcode-mcli windows list --json --verbose
+```
+
+## Command Groups
+
+- `setup`
+- `daemon`
+- `windows`
+- `project`
+- `docs`
+- `snippet`
+- `build`
+- `issues`
+- `tests`
+- `preview`
+- `files`
+
+## Docs
+
+- [docs/api-reference.md](docs/api-reference.md)
+- [docs/setup.md](docs/setup.md)
+- [docs/troubleshooting.md](docs/troubleshooting.md)
+
+## Development
 
 ```bash
 npm test
-make lint-dry
 make lint
 make verify
 ```
-
-## Add a New Command
-
-1. Add `src/commands/<name>.ts`.
-2. Export a command definition using `defineCommand(...)`.
-3. Register it in `src/commands/index.ts`.
-4. Add command tests under `tests/`.
-5. Update command usage in this README and `docs/api-reference.md`.
-
-Command definitions use path segments:
-
-- One-level command: `path: ["publish"]`
-- Two-level command: `path: ["project", "publish"]`
-- Three-level command: `path: ["workspace", "full", "sync"]`
-
-Options are parsed by Commander and validated by Zod in `optionsSchema`.
-
-## CLI UX Defaults
-
-- Human-first output: commands print short sentence-style text.
-- Global flags: `--help` and `--version`.
-- Parse and validation failures map to usage errors (`exitCode=2`).
-- Command runtime failures map to runtime errors (`exitCode=1`).
-
-Prefer one-level and two-level commands by default. Use deeper paths only when grouping clearly improves discoverability.
-
-## Use This as a Template Repo
-
-When cloning or generating a new package from this template, update:
-
-1. `package.json`:
-   - `name`
-   - `description`
-   - `bin` command key and path
-2. `bin/command-template.ts` filename (if command name changes).
-3. `src/core/command-dispatch.ts`:
-   - top-level CLI title
-   - usage strings
-4. README examples and docs command names.
-5. tests that assert command names/output.
-
-## API Docs
-
-- `docs/api-reference.md`
