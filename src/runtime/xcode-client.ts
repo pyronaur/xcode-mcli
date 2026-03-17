@@ -15,7 +15,7 @@ type XcodeToolDefinition = {
 type XcodeToolCallResult = {
 	content: Array<Record<string, unknown>>;
 	isError: boolean;
-	structuredContent?: Record<string, unknown>;
+	structuredContent?: unknown;
 	text: string;
 };
 
@@ -42,7 +42,7 @@ const listToolsResultSchema = z.object({
 const toolCallResultSchema = z.object({
 	content: z.array(z.record(z.string(), z.unknown())).default([]),
 	isError: z.boolean().default(false),
-	structuredContent: z.record(z.string(), z.unknown()).optional(),
+	structuredContent: z.unknown().optional(),
 });
 
 function readTextContent(content: Array<Record<string, unknown>>): string {
@@ -54,14 +54,35 @@ function readTextContent(content: Array<Record<string, unknown>>): string {
 	);
 }
 
+function parseStructuredContentFromText(text: string): unknown {
+	const trimmed = text.trim();
+	if (trimmed.length === 0) {
+		return undefined;
+	}
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(trimmed);
+	} catch {
+		return undefined;
+	}
+	if (!parsed || typeof parsed !== "object") {
+		return undefined;
+	}
+	if ("message" in parsed && typeof parsed.message === "string") {
+		return undefined;
+	}
+	return parsed;
+}
+
 function toToolCallResult(result: unknown): XcodeToolCallResult {
 	const payload = toolCallResultSchema.parse(result ?? {});
 	const content = payload.content;
+	const text = readTextContent(content);
 	return {
 		content,
 		isError: payload.isError,
-		structuredContent: payload.structuredContent,
-		text: readTextContent(content),
+		structuredContent: payload.structuredContent ?? parseStructuredContentFromText(text),
+		text,
 	};
 }
 

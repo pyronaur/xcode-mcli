@@ -261,3 +261,57 @@ test("project build auto-resolves wrapped window text from XcodeListWindows", as
 		delete process.env.XCODE_MCLI_XCRUN_PATH;
 	}
 });
+
+test("project build normalizes JSON-string tool text into structured data", async () => {
+	const environment = await createFakeXcrunEnvironment({
+		tools: [
+			{
+				name: "BuildProject",
+				description: "Build project.",
+				inputSchema: {
+					type: "object",
+					properties: {
+						tabIdentifier: {
+							type: "string",
+						},
+					},
+				},
+			},
+		],
+		callResults: {
+			BuildProject: {
+				content: [
+					{
+						type: "text",
+						text: "{\"buildResult\":\"The project built successfully.\",\"elapsedTime\":1.3781360387802124,\"errors\":[]}",
+					},
+				],
+			},
+		},
+	});
+	process.env.XCODE_MCLI_STATE_ROOT = environment.stateRoot;
+	process.env.XCODE_MCLI_XCRUN_PATH = environment.xcrunPath;
+	try {
+		const lines = await captureConsoleLogs(async () => {
+			await runXcodeMcli(
+				["project", "build", "--tab-identifier", "windowtab1", "--json"],
+				process.cwd(),
+			);
+		});
+		expect(JSON.parse(lines[0] ?? "")).toEqual({
+			ok: true,
+			command: "project build",
+			tool: "BuildProject",
+			tabIdentifier: "windowtab1",
+			data: {
+				buildResult: "The project built successfully.",
+				elapsedTime: 1.3781360387802124,
+				errors: [],
+			},
+		});
+	} finally {
+		await runXcodeMcli(["daemon", "stop"], process.cwd());
+		delete process.env.XCODE_MCLI_STATE_ROOT;
+		delete process.env.XCODE_MCLI_XCRUN_PATH;
+	}
+});
