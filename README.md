@@ -43,8 +43,10 @@ The daemon auto-starts on the first daemon-backed command.
 Example:
 
 ```bash
-xcode-mcli windows list --json --verbose
+xcode-mcli --json --verbose windows list
 ```
+
+`--json`, `--verbose`, and `--tab-identifier <id>` can be passed either before the command path or after the specific command.
 
 ## Command Groups
 

@@ -40,6 +40,10 @@ For tool-backed commands, `--verbose` prints `Xcode MCP tool: <ToolName>` to `st
   Prints the stable JSON wrapper envelope.
 - `--verbose`
   Prints the exact Xcode MCP tool name to `stderr` for tool-backed commands.
+- `--tab-identifier <id>`
+  Provides the active Xcode tab identifier for tab-aware commands.
+
+Shared flags can be passed before the command path or after the specific command.
 
 ## Setup
 

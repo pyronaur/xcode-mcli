@@ -88,11 +88,13 @@ xcode-mcli tests list --tab-identifier windowtab1
 Use `--json` for a stable wrapper envelope:
 
 ```bash
-xcode-mcli windows list --json
+xcode-mcli --json windows list
 ```
 
 Use `--verbose` to print the exact Xcode MCP tool name to `stderr` for tool-backed commands:
 
 ```bash
-xcode-mcli windows list --json --verbose
+xcode-mcli --json --verbose windows list
 ```
+
+`--json`, `--verbose`, and `--tab-identifier <id>` can be passed before the command path or after the specific command.
