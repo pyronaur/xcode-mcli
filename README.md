@@ -80,7 +80,7 @@ npm run compat:xcode-mcp:verify
 The pinned Apple Xcode 26.3 baseline lives at:
 
 ```text
-compat/xcode-mcp/apple-xcode-26.3.surface.json
+skill/references/apple-xcode-26.3.surface.json
 ```
 
 ## Development

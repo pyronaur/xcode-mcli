@@ -147,7 +147,7 @@ npm run compat:xcode-mcp:verify
 If it fails, inspect the categorized diff with:
 
 ```bash
-xcode-mcli surface verify --baseline-file compat/xcode-mcp/apple-xcode-26.3.surface.json --json
+xcode-mcli surface verify --baseline-file skill/references/apple-xcode-26.3.surface.json --json
 ```
 
 Review whether the live Xcode release changed:

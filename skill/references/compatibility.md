@@ -14,7 +14,7 @@ The compatibility contract is the normalized result of:
 The pinned Apple Xcode 26.3 baseline is:
 
 ```text
-compat/xcode-mcp/apple-xcode-26.3.surface.json
+skill/references/apple-xcode-26.3.surface.json
 ```
 
 That snapshot currently records:
@@ -35,13 +35,13 @@ xcode-mcli surface snapshot
 Write a canonical snapshot file:
 
 ```bash
-xcode-mcli surface snapshot --output-file compat/xcode-mcp/apple-xcode-26.3.surface.json
+xcode-mcli surface snapshot --output-file skill/references/apple-xcode-26.3.surface.json
 ```
 
 Verify the current Xcode MCP surface against the pinned 26.3 baseline:
 
 ```bash
-xcode-mcli surface verify --baseline-file compat/xcode-mcp/apple-xcode-26.3.surface.json
+xcode-mcli surface verify --baseline-file skill/references/apple-xcode-26.3.surface.json
 ```
 
 Convenience npm scripts:
@@ -86,6 +86,6 @@ For machine-readable inspection:
 
 ```bash
 xcode-mcli surface verify \
-  --baseline-file compat/xcode-mcp/apple-xcode-26.3.surface.json \
+  --baseline-file skill/references/apple-xcode-26.3.surface.json \
   --json
 ```

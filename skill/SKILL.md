@@ -66,5 +66,5 @@ When Xcode changes:
 
 1. Run `npm run compat:xcode-mcp:verify` from `/Users/n14/Projects/Tools/xcode-mcli`.
 2. If it fails, read `references/compatibility.md`.
-3. Inspect the exact live-vs-baseline diff with `xcode-mcli surface verify --baseline-file compat/xcode-mcp/apple-xcode-26.3.surface.json --json`.
+3. Inspect the exact live-vs-baseline diff with `xcode-mcli surface verify --baseline-file skill/references/apple-xcode-26.3.surface.json --json`.
 4. Use `references/apple-xcode-26.3.surface.json` as the pinned baseline reference.
