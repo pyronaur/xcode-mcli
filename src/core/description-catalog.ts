@@ -42,7 +42,7 @@ const toolDescriptions = {
 	XcodeWrite: "Creates or overwrites files with content in the Xcode project.",
 } as const;
 
-export const cliDescription = "One-to-one CLI for Apple's Xcode MCP bridge.";
+export const cliDescription = "Use Xcode from the terminal through Apple's Xcode MCP bridge.";
 
 function readCatalogValue<TCatalog extends Record<string, string>>(
 	catalog: TCatalog,

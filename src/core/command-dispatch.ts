@@ -4,6 +4,7 @@ import { commandDefinitions } from "../commands/index.ts";
 import { registerCommand } from "./command-definition.ts";
 import { cliDescription } from "./description-catalog.ts";
 import { usageError } from "./errors.ts";
+import { readProgramHelpText, tabIdentifierOptionDescription } from "./help-text.ts";
 import { readPackageVersion } from "./package-version.ts";
 
 function hasJsonFlag(argv: string[]): boolean {
@@ -21,7 +22,7 @@ async function createProgram(projectDir: string, argv: string[]): Promise<Comman
 		.version(packageVersion, "--version", "Show package version.")
 		.option("--json", "Print command results as JSON.")
 		.option("--verbose", "Print extra execution details.")
-		.option("--tab-identifier <id>", "Active Xcode window tab identifier.")
+		.option("--tab-identifier <id>", tabIdentifierOptionDescription)
 		.configureOutput({
 			writeErr: (value) => {
 				if (jsonMode) {
@@ -32,6 +33,7 @@ async function createProgram(projectDir: string, argv: string[]): Promise<Comman
 		})
 		.showSuggestionAfterError()
 		.exitOverride();
+	program.addHelpText("after", readProgramHelpText());
 	for (const definition of commandDefinitions) {
 		registerCommand({
 			program,

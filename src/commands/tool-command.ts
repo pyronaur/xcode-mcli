@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { defineCommand } from "../core/command-definition.ts";
 import { runtimeError } from "../core/errors.ts";
+import { tabIdentifierOptionDescription } from "../core/help-text.ts";
 import { callDaemonTool } from "../runtime/daemon-host.ts";
 import {
 	printCommandResult,
@@ -58,7 +59,7 @@ function readTabIdentifierOption(options: unknown): string | undefined {
 }
 
 export function addTabIdentifierOption(command: Command): void {
-	command.option("--tab-identifier <id>", "Active Xcode window tab identifier.");
+	command.option("--tab-identifier <id>", tabIdentifierOptionDescription);
 }
 
 export function collectRepeatedStrings(

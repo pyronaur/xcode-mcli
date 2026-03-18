@@ -5,6 +5,7 @@ import type { output, ZodType } from "zod";
 import type { CommandDefinition } from "./contracts.ts";
 import { describeCommandGroup, describeToolCommand } from "./description-catalog.ts";
 import { attachCommandMetadata, runtimeError, usageError } from "./errors.ts";
+import { readCommandGroupHelpText, readCommandHelpText } from "./help-text.ts";
 
 function commandPathToString(path: readonly string[]): string {
 	return path.join(" ");
@@ -81,14 +82,26 @@ function findOrCreateGroupCommand(program: Command, groupName: string): Command 
 	if (existingGroup) {
 		return existingGroup;
 	}
-	return program.command(groupName).description(describeCommandGroup(groupName)).exitOverride();
+	const groupCommand = program.command(groupName)
+		.description(describeCommandGroup(groupName))
+		.exitOverride();
+	const helpText = readCommandGroupHelpText(groupName);
+	if (helpText) {
+		groupCommand.addHelpText("after", helpText);
+	}
+	return groupCommand;
 }
 
 function createLeafCommand(parent: Command, input: {
 	name: string;
 	description: string;
+	helpText?: string;
 }): Command {
-	return parent.command(input.name).description(input.description).exitOverride();
+	const command = parent.command(input.name).description(input.description).exitOverride();
+	if (input.helpText) {
+		command.addHelpText("after", input.helpText);
+	}
+	return command;
 }
 
 function createRegisteredCommand(
@@ -107,6 +120,7 @@ function createRegisteredCommand(
 	return createLeafCommand(parent, {
 		name: leaf,
 		description: describeToolCommand(definition.toolName, definition.description),
+		helpText: readCommandHelpText(definition.path),
 	});
 }
 

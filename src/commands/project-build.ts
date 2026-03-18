@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { defineCommand } from "../core/command-definition.ts";
+import { tabIdentifierOptionDescription } from "../core/help-text.ts";
 import { callDaemonTool } from "../runtime/daemon-host.ts";
 import {
 	printCommandResult,
@@ -22,7 +23,7 @@ export const projectBuildCommand = defineCommand({
 	description: "Build the active Xcode project.",
 	toolName: "BuildProject",
 	configure: (command) => {
-		command.option("--tab-identifier <id>", "Active Xcode window tab identifier.");
+		command.option("--tab-identifier <id>", tabIdentifierOptionDescription);
 	},
 	optionsSchema: projectBuildOptionsSchema,
 	run: async ({ commandPath, globals, options }) => {
