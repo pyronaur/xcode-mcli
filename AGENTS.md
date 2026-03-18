@@ -29,6 +29,11 @@ Tests must verify observable behavior at the CLI surface:
 3. Command output contracts in text and JSON modes.
 4. Exit behavior for usage/runtime failures.
 
+Help-specific rule:
+- Do not add tests that pin editorial help prose or other copy-only strings.
+- Help tests are allowed only when they verify meaningful CLI behavior such as command routing, help availability, required structural sections, or machine-relevant tokens that act like interface shape.
+- Do not spend engineering time on tests whose main purpose is asserting that specific explanatory wording appears in help output.
+
 For bugs:
 - Add a failing path test first.
 - Fix the bug.
