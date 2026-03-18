@@ -14,7 +14,7 @@ test("dispatch prints top-level help when no args", async () => {
 	expect(output.stdout).toContain("setup");
 	expect(output.stdout).toContain("daemon");
 	expect(output.stdout).toContain("windows");
-	expect(output.stdout).toContain("Quick Start:");
+	expect(output.stdout).toContain("Agent Workflow:");
 	expect(output.stdout).toContain("xcode-mcli setup");
 	expect(output.stdout).toContain("xcode-mcli windows list");
 	expect(output.stdout).toContain("xcode-mcli windows use --tab-identifier windowtab1");

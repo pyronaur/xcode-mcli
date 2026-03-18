@@ -1,15 +1,16 @@
 const commandGroupDescriptions = {
 	build: "Inspect the current or most recently finished Xcode build log.",
-	daemon: "Manage the persistent Xcode MCP bridge daemon.",
-	docs: "Search Apple Developer Documentation using semantic matching.",
-	files: "Read, search, and modify files in the Xcode project structure.",
+	daemon:
+		"Control the persistent Xcode MCP bridge daemon when you need explicit lifecycle commands.",
+	docs: "Search Apple Developer Documentation from the terminal.",
+	files: "Read, search, and safely modify files in the active Xcode project.",
 	issues: "Inspect workspace issues and file-specific compiler diagnostics.",
 	preview: "Build and render SwiftUI previews from source files.",
-	project: "Build the active Xcode project and wait for completion.",
+	project: "Run a build for the active Xcode workspace tab and wait for completion.",
 	snippet: "Build and run Swift snippets in the context of a source file.",
-	surface: "Capture and verify the live Xcode MCP tool surface.",
+	surface: "Capture and verify the live Xcode MCP tool surface for compatibility work.",
 	tests: "List tests and run the active scheme's active test plan.",
-	windows: "List Xcode windows and select the active workspace tab.",
+	windows: "List Xcode windows and pin the active workspace tab.",
 } as const;
 
 const toolDescriptions = {
