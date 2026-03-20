@@ -14,6 +14,12 @@ import {
 	resolveStateRoot,
 } from "./env.ts";
 import { createXcodeBridgeClient } from "./xcode-client.ts";
+import {
+	parseRawToolCallResult,
+	type ToolCallResult,
+	type ToolName,
+	validateToolCallResult,
+} from "./xcode-tool-contract.ts";
 
 type DaemonRequest =
 	| {
@@ -364,10 +370,10 @@ function readDaemonToolErrorMessage(result: unknown): string | null {
 	return "Xcode MCP tool failed.";
 }
 
-export async function callDaemonTool(input: {
+export async function callDaemonTool<K extends ToolName>(input: {
 	arguments: Record<string, unknown>;
-	name: string;
-}): Promise<unknown> {
+	name: K;
+}): Promise<ToolCallResult<K>> {
 	await startDaemon();
 	const response = await sendDaemonRequest({
 		id: 1,
@@ -376,11 +382,12 @@ export async function callDaemonTool(input: {
 		arguments: input.arguments,
 	});
 	if (response.ok) {
-		const toolErrorMessage = readDaemonToolErrorMessage(response.result);
+		const rawResult = parseRawToolCallResult(response.result);
+		const toolErrorMessage = readDaemonToolErrorMessage(rawResult);
 		if (toolErrorMessage) {
 			throw runtimeError(toolErrorMessage);
 		}
-		return response.result;
+		return validateToolCallResult(input.name, rawResult);
 	}
 	throw runtimeError(response.error);
 }

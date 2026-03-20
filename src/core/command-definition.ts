@@ -2,7 +2,15 @@ import { Command } from "commander";
 import { z } from "zod";
 import type { output, ZodType } from "zod";
 
-import type { CommandDefinition } from "./contracts.ts";
+import { callDaemonTool } from "../runtime/daemon-host.ts";
+import { printVerboseTool } from "../runtime/output.ts";
+import type { ToolName } from "../runtime/xcode-tool-contract.ts";
+import {
+	type CommandDefinition,
+	isToolCommandDefinition,
+	type PlainCommandDefinition,
+	type ToolCommandDefinition,
+} from "./contracts.ts";
 import { describeCommandGroup, describeToolCommand } from "./description-catalog.ts";
 import { attachCommandMetadata, runtimeError, usageError } from "./errors.ts";
 import { readCommandGroupHelpText, readCommandHelpText } from "./help-text.ts";
@@ -61,17 +69,34 @@ function registerCommandAction<TSchema extends ZodType>(input: {
 			input.definition.optionsSchema,
 			command.optsWithGlobals(),
 		);
+		const globals = readGlobalOptions(command);
+		const context = {
+			commandPath: input.definition.path,
+			globals,
+			projectDir: input.projectDir,
+			options: parsedOptions,
+		};
 		try {
-			await input.definition.run({
-				commandPath: input.definition.path,
-				globals: readGlobalOptions(command),
-				projectDir: input.projectDir,
-				options: parsedOptions,
-			});
+			if (isToolCommandDefinition(input.definition)) {
+				printVerboseTool(globals, input.definition.toolName);
+				const toolArguments = await input.definition.buildArguments(context);
+				const result = await callDaemonTool({
+					name: input.definition.toolName,
+					arguments: toolArguments,
+				});
+				await input.definition.run({
+					...context,
+					toolArguments,
+				}, result);
+				return;
+			}
+			await input.definition.run(context);
 		} catch (error) {
 			throw attachCommandMetadata(error, {
 				commandName: commandPathToString(input.definition.path),
-				toolName: input.definition.toolName,
+				toolName: isToolCommandDefinition(input.definition)
+					? input.definition.toolName
+					: undefined,
 			});
 		}
 	});
@@ -106,7 +131,7 @@ function createLeafCommand(parent: Command, input: {
 
 function createRegisteredCommand(
 	program: Command,
-	definition: CommandDefinition<ZodType>,
+	definition: CommandDefinition,
 ): Command {
 	const path = [...definition.path];
 	const leaf = path.pop();
@@ -117,9 +142,10 @@ function createRegisteredCommand(
 	for (const groupName of path) {
 		parent = findOrCreateGroupCommand(parent, groupName);
 	}
+	const toolName = isToolCommandDefinition(definition) ? definition.toolName : undefined;
 	return createLeafCommand(parent, {
 		name: leaf,
-		description: describeToolCommand(definition.toolName, definition.description),
+		description: describeToolCommand(toolName, definition.description),
 		helpText: readCommandHelpText(definition.path),
 	});
 }
@@ -140,7 +166,23 @@ export function registerCommand<TSchema extends ZodType>(input: {
 }
 
 export function defineCommand<TSchema extends ZodType>(
-	definition: CommandDefinition<TSchema>,
-): CommandDefinition<TSchema> {
-	return definition;
+	definition: Omit<PlainCommandDefinition<TSchema>, "kind">,
+): PlainCommandDefinition<TSchema> {
+	return {
+		kind: "command",
+		...definition,
+	};
+}
+
+export function defineToolCommand<
+	K extends ToolName,
+	TSchema extends ZodType,
+	TArguments extends Record<string, unknown>,
+>(
+	definition: Omit<ToolCommandDefinition<K, TSchema, TArguments>, "kind">,
+): ToolCommandDefinition<K, TSchema, TArguments> {
+	return {
+		kind: "tool",
+		...definition,
+	};
 }

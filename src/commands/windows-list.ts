@@ -1,31 +1,20 @@
 import { z } from "zod";
 
-import { defineCommand } from "../core/command-definition.ts";
-import { callDaemonTool } from "../runtime/daemon-host.ts";
+import { defineToolCommand } from "../core/command-definition.ts";
 import { setLastSeenWindows } from "../runtime/daemon-state.ts";
 import {
 	printCommandResult,
-	printVerboseTool,
 	toCommandData,
 } from "../runtime/output.ts";
-import {
-	readWindowsFromToolResult,
-	xcodeWindowsToolResultSchema,
-} from "../runtime/xcode-windows.ts";
+import { readWindowsFromToolResult } from "../runtime/xcode-windows.ts";
 
-export const windowsListCommand = defineCommand({
+export const windowsListCommand = defineToolCommand({
 	path: ["windows", "list"],
 	description: "List open Xcode windows.",
 	toolName: "XcodeListWindows",
 	optionsSchema: z.object({}),
-	run: async ({ commandPath, globals }) => {
-		printVerboseTool(globals, "XcodeListWindows");
-		const result = xcodeWindowsToolResultSchema.parse(
-			await callDaemonTool({
-				name: "XcodeListWindows",
-				arguments: {},
-			}),
-		);
+	buildArguments: async () => ({}),
+	run: async ({ commandPath, globals }, result) => {
 		const windows = readWindowsFromToolResult(result);
 		await setLastSeenWindows(windows);
 		printCommandResult({

@@ -9,22 +9,13 @@ export const xcodeWindowSchema = z.object({
 	workspacePath: z.string().min(1),
 });
 
-export const xcodeWindowsToolResultSchema = z.object({
-	structuredContent: z
-		.object({
-			windows: z.array(xcodeWindowSchema),
-		})
-		.optional(),
-	text: z.string().default(""),
-});
-
 export function readWindowsFromToolResult(input: {
 	structuredContent?: {
-		windows: Array<z.infer<typeof xcodeWindowSchema>>;
+		message: string;
 	};
 	text: string;
 }): Array<z.infer<typeof xcodeWindowSchema>> {
-	return input.structuredContent?.windows ?? parseWindowsFromText(input.text);
+	return parseWindowsFromText(input.structuredContent?.message ?? input.text);
 }
 
 export function normalizeXcodeToolText(text: string): string {

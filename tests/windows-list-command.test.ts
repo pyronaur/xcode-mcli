@@ -32,12 +32,7 @@ test("windows list reuses one daemon-backed bridge session across repeated calls
 					},
 				],
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 			},
 		},
@@ -88,12 +83,7 @@ test("windows list prints a stable JSON envelope", async () => {
 					},
 				],
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 			},
 		},
@@ -146,12 +136,7 @@ test("windows list caches the last seen windows in daemon state", async () => {
 					},
 				],
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 			},
 		},
@@ -216,12 +201,7 @@ test("windows list caches the current Xcode tool list in daemon state", async ()
 					},
 				],
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 			},
 		},
@@ -291,12 +271,7 @@ test("windows list records the active bridge process and successful Xcode connec
 					},
 				],
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 			},
 		},

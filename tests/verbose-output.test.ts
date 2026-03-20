@@ -24,12 +24,7 @@ test("cli prints the exact Xcode tool name to stderr in verbose JSON mode", asyn
 					},
 				],
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 			},
 		},
@@ -89,12 +84,7 @@ test("cli accepts shared JSON and verbose flags before the command path", async 
 					},
 				],
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 			},
 		},

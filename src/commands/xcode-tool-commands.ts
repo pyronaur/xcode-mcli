@@ -28,24 +28,24 @@ const tabOnlyCommandSpecs = [
 	{
 		description: "List tests from the active test plan.",
 		path: ["tests", "list"] as const,
-		toolName: "GetTestList",
+		toolName: "GetTestList" as const,
 	},
 	{
 		description: "Run all tests from the active test plan.",
 		path: ["tests", "run-all"] as const,
-		toolName: "RunAllTests",
+		toolName: "RunAllTests" as const,
 	},
 ];
 const filteredCommandSpecs = [
 	{
 		description: "Read the current or latest build log.",
 		path: ["build", "log"] as const,
-		toolName: "GetBuildLog",
+		toolName: "GetBuildLog" as const,
 	},
 	{
 		description: "List navigator issues.",
 		path: ["issues", "list"] as const,
-		toolName: "XcodeListNavigatorIssues",
+		toolName: "XcodeListNavigatorIssues" as const,
 	},
 ];
 

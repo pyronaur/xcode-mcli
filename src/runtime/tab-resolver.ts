@@ -5,7 +5,7 @@ import {
 	setActiveTabIdentifier,
 	setLastSeenWindows,
 } from "./daemon-state.ts";
-import { readWindowsFromToolResult, xcodeWindowsToolResultSchema } from "./xcode-windows.ts";
+import { readWindowsFromToolResult } from "./xcode-windows.ts";
 
 export async function resolveTabIdentifier(input: {
 	explicitTabIdentifier?: string;
@@ -19,12 +19,10 @@ export async function resolveTabIdentifier(input: {
 	if (daemonState.activeTabIdentifier) {
 		return daemonState.activeTabIdentifier;
 	}
-	const result = xcodeWindowsToolResultSchema.parse(
-		await callDaemonTool({
-			name: "XcodeListWindows",
-			arguments: {},
-		}),
-	);
+	const result = await callDaemonTool({
+		name: "XcodeListWindows",
+		arguments: {},
+	});
 	const windows = readWindowsFromToolResult(result);
 	await setLastSeenWindows(windows);
 	if (windows.length === 1) {

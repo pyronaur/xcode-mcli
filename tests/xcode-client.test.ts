@@ -21,12 +21,7 @@ test("xcode bridge client initializes and calls Xcode tools over stdio JSON-RPC"
 		callResults: {
 			XcodeListWindows: {
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 				content: [
 					{
@@ -48,12 +43,7 @@ test("xcode bridge client initializes and calls Xcode tools over stdio JSON-RPC"
 		expect(await client.callTool({ name: "XcodeListWindows", arguments: {} })).toEqual(
 			expect.objectContaining({
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 				text: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 			}),
@@ -77,8 +67,8 @@ test("xcode surface discovery captures tools, prompts, resources, and protocol v
 				outputSchema: {
 					type: "object",
 					properties: {
-						windows: {
-							type: "array",
+						message: {
+							type: "string",
 						},
 					},
 				},
@@ -137,8 +127,8 @@ test("xcode surface discovery captures tools, prompts, resources, and protocol v
 					name: "XcodeListWindows",
 					outputSchema: {
 						properties: {
-							windows: {
-								type: "array",
+							message: {
+								type: "string",
 							},
 						},
 						type: "object",

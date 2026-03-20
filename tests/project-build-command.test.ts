@@ -40,12 +40,7 @@ test("project build auto-resolves the single Xcode window tab before calling Bui
 					},
 				],
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 			},
 			BuildProject: {
@@ -105,12 +100,7 @@ test("project build prints a stable JSON envelope", async () => {
 					},
 				],
 				structuredContent: {
-					windows: [
-						{
-							tabIdentifier: "windowtab1",
-							workspacePath: "/tmp/Countdown.xcworkspace",
-						},
-					],
+					message: "* tabIdentifier: windowtab1, workspacePath: /tmp/Countdown.xcworkspace\n",
 				},
 			},
 			BuildProject: {

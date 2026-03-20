@@ -2,38 +2,34 @@ import type { Command } from "commander";
 import { readFile } from "node:fs/promises";
 import { z } from "zod";
 
-import { defineCommand } from "../core/command-definition.ts";
+import { defineToolCommand } from "../core/command-definition.ts";
 import { runtimeError } from "../core/errors.ts";
 import { tabIdentifierOptionDescription } from "../core/help-text.ts";
-import { callDaemonTool } from "../runtime/daemon-host.ts";
 import {
 	printCommandResult,
-	printVerboseTool,
 	toCommandData,
 } from "../runtime/output.ts";
 import { resolveTabIdentifier } from "../runtime/tab-resolver.ts";
+import type {
+	ToolCallResult,
+	ToolName,
+} from "../runtime/xcode-tool-contract.ts";
 
-type ToolCommandResult = {
-	structuredContent?: unknown;
-	text: string;
-};
-
-type ToolCommandDefinitionInput<TOptions> = {
-	buildArguments: (options: TOptions) => Promise<Record<string, unknown>> | Record<string, unknown>;
+type ToolCommandDefinitionInput<
+	K extends ToolName,
+	TOptions,
+	TArguments extends Record<string, unknown>,
+> = {
+	buildArguments: (options: TOptions) => Promise<TArguments> | TArguments;
 	configure?: (command: Command) => void;
 	description: string;
 	path: readonly [string, ...string[]];
 	requiresTab?: boolean;
-	toolName: string;
+	toolName: K;
 	optionsSchema: z.ZodType<TOptions>;
 };
 
-const toolCommandResultSchema = z.object({
-	structuredContent: z.unknown().optional(),
-	text: z.string().default(""),
-});
-
-function defaultToolText(result: ToolCommandResult): string {
+function defaultToolText(result: ToolCallResult<ToolName>): string {
 	const text = result.text.trimEnd();
 	if (text.length > 0) {
 		return text;
@@ -115,27 +111,28 @@ export function requireYes(
 	}
 }
 
-export function createToolCommand<TOptions>(input: ToolCommandDefinitionInput<TOptions>) {
-	return defineCommand({
+export function createToolCommand<
+	K extends ToolName,
+	TOptions,
+	TArguments extends Record<string, unknown>,
+>(input: ToolCommandDefinitionInput<K, TOptions, TArguments>) {
+	return defineToolCommand({
 		path: input.path,
 		description: input.description,
 		toolName: input.toolName,
 		configure: input.configure,
 		optionsSchema: input.optionsSchema,
-		run: async ({ commandPath, globals, options }) => {
+		buildArguments: async ({ options }) => {
 			const toolArguments = await input.buildArguments(options);
-			if (input.requiresTab && typeof toolArguments.tabIdentifier !== "string") {
-				toolArguments.tabIdentifier = await resolveTabIdentifier({
+			const resolvedToolArguments = toolArguments as Record<string, unknown>;
+			if (input.requiresTab && typeof resolvedToolArguments.tabIdentifier !== "string") {
+				resolvedToolArguments.tabIdentifier = await resolveTabIdentifier({
 					explicitTabIdentifier: readTabIdentifierOption(options),
 				});
 			}
-			printVerboseTool(globals, input.toolName);
-			const result = toolCommandResultSchema.parse(
-				await callDaemonTool({
-					name: input.toolName,
-					arguments: toolArguments,
-				}),
-			);
+			return toolArguments;
+		},
+		run: async ({ commandPath, globals, toolArguments }, result) => {
 			printCommandResult({
 				commandPath,
 				globals,
