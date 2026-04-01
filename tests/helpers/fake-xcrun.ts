@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 
+import { trackDaemonStateRoot } from "./daemon-cleanup.ts";
+
 type FakeToolDefinition = {
 	name: string;
 	description?: string;
@@ -60,6 +62,7 @@ export async function createFakeXcrunEnvironment(scenario: FakeBridgeScenario): 
 	await writeFile(scenarioPath, JSON.stringify(scenario, null, 2));
 	await writeFile(xcrunPath, script);
 	await chmod(xcrunPath, 0o755);
+	trackDaemonStateRoot(stateRoot);
 	return {
 		stateRoot,
 		xcrunPath,

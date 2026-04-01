@@ -80,6 +80,8 @@ Inspect status:
 xcode-mcli daemon status
 ```
 
+If the state root still points at a stale daemon process or socket, the next daemon-backed command replaces that stale state and reconnects through one live daemon for the state root.
+
 ## JSON output is mixed with diagnostic text
 
 `--json` writes the stable envelope to `stdout`.

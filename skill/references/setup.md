@@ -49,6 +49,12 @@ xcode-mcli windows use --tab-identifier windowtab1
 
 The daemon auto-starts on the first daemon-backed command.
 
+Daemon-backed commands reuse the live daemon for the current state root.
+
+If the state root points at a stale daemon process or stale socket, `xcode-mcli` replaces it before serving the next command.
+
+Stopping the daemon also shuts down the active Xcode bridge child for that state root.
+
 Explicit lifecycle commands:
 
 ```bash

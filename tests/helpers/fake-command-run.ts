@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 
 import { runXcodeMcli } from "../../src/core/command-dispatch.ts";
 import { captureConsoleLogs } from "./console.ts";
+import { untrackDaemonStateRoot } from "./daemon-cleanup.ts";
 import { createFakeXcrunEnvironment } from "./fake-xcrun.ts";
 
 type FakeToolDefinition = {
@@ -68,6 +69,7 @@ export async function runCommandWithFakeBridge(input: {
 		};
 	} finally {
 		await runXcodeMcli(["daemon", "stop"], process.cwd());
+		untrackDaemonStateRoot(environment.stateRoot);
 		delete process.env.XCODE_MCLI_STATE_ROOT;
 		delete process.env.XCODE_MCLI_XCRUN_PATH;
 	}
