@@ -1,4 +1,5 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { spawn } from "node:child_process";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -33,6 +34,17 @@ function processExists(pid: number): boolean {
 
 async function readStateJson<T>(stateRoot: string): Promise<T> {
 	return JSON.parse(await readFile(join(stateRoot, "state.json"), "utf8")) as T;
+}
+
+async function waitForChildExit(child: ReturnType<typeof spawn>): Promise<void> {
+	if (child.exitCode !== null || child.signalCode !== null) {
+		return;
+	}
+	await new Promise<void>((resolve) => {
+		child.once("exit", () => {
+			resolve();
+		});
+	});
 }
 
 test("daemon lifecycle commands start, report, and stop the daemon", async () => {
@@ -157,6 +169,29 @@ test("daemon stop shuts down the active bridge child", async () => {
 	} finally {
 		delete process.env.XCODE_MCLI_STATE_ROOT;
 		delete process.env.XCODE_MCLI_XCRUN_PATH;
+	}
+});
+
+test("daemon stop ignores a stale pid file that points at an unrelated process", async () => {
+	const stateRoot = await mkdtemp(join(tmpdir(), "xcode-mcli-daemon-foreign-pid-"));
+	const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], {
+		stdio: "ignore",
+	});
+	process.env.XCODE_MCLI_STATE_ROOT = stateRoot;
+	try {
+		expect(child.pid).toEqual(expect.any(Number));
+		await writeFile(join(stateRoot, "daemon.pid"), `${child.pid}\n`);
+
+		await runXcodeMcli(["daemon", "stop"], process.cwd());
+
+		expect(processExists(child.pid ?? 0)).toBe(true);
+		await expect(readFile(join(stateRoot, "daemon.pid"), "utf8")).rejects.toMatchObject({
+			code: "ENOENT",
+		});
+	} finally {
+		child.kill("SIGTERM");
+		await waitForChildExit(child);
+		delete process.env.XCODE_MCLI_STATE_ROOT;
 	}
 });
 

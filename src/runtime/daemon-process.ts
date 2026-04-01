@@ -1,20 +1,34 @@
+import { execFile as execFileCallback } from "node:child_process";
 import { readFile, rm } from "node:fs/promises";
+import { promisify } from "node:util";
 
 import { runtimeError } from "../core/errors.ts";
 import { resolveDaemonPidFilePath, resolveDaemonSocketPath } from "./env.ts";
+
+const execFile = promisify(execFileCallback);
+const daemonCommandFragment = "daemon-host-entry.ts";
+
+function isOwnedDaemonProcessError(error: unknown): boolean {
+	return error instanceof Error && "code" in error && error.code === 1;
+}
+
+async function isOwnedDaemonProcess(pid: number): Promise<boolean> {
+	try {
+		const { stdout } = await execFile("ps", ["-p", String(pid), "-o", "command="]);
+		return stdout.includes(daemonCommandFragment);
+	} catch (error) {
+		if (isOwnedDaemonProcessError(error)) {
+			return false;
+		}
+		throw error;
+	}
+}
 
 export function isNodeErrorWithCode(
 	error: unknown,
 	code: string,
 ): error is NodeJS.ErrnoException {
 	return error instanceof Error && "code" in error && error.code === code;
-}
-
-export async function cleanupDaemonFiles(): Promise<void> {
-	await Promise.all([
-		rm(resolveDaemonSocketPath(), { force: true }),
-		rm(resolveDaemonPidFilePath(), { force: true }),
-	]);
 }
 
 export function isProcessRunning(pid: number): boolean {
@@ -27,6 +41,13 @@ export function isProcessRunning(pid: number): boolean {
 		}
 		throw error;
 	}
+}
+
+export async function cleanupDaemonFiles(): Promise<void> {
+	await Promise.all([
+		rm(resolveDaemonSocketPath(), { force: true }),
+		rm(resolveDaemonPidFilePath(), { force: true }),
+	]);
 }
 
 export async function waitForProcessExit(pid: number): Promise<void> {
@@ -62,5 +83,8 @@ export async function readLiveDaemonPid(): Promise<number | null> {
 	if (!pid) {
 		return null;
 	}
-	return isProcessRunning(pid) ? pid : null;
+	if (!isProcessRunning(pid)) {
+		return null;
+	}
+	return await isOwnedDaemonProcess(pid) ? pid : null;
 }
