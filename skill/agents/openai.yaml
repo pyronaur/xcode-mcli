@@ -1,4 +1,4 @@
 interface:
   display_name: "Xcode CLI"
-  short_description: "Use xcode-mcli for Xcode MCP parity"
-  default_prompt: "Use $xcode to drive Apple Xcode through the local xcode-mcli CLI instead of attaching the Xcode MCP server."
+  short_description: "Task needs the open Xcode window, issues, build logs, previews, snippets, or selective test runs"
+  default_prompt: "Read when to interact with Xcode.app directly and task needs Xcode windows, issues, build logs, documentation search, previews, snippets, test discovery or selective test runs."

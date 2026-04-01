@@ -1,15 +1,24 @@
 ---
 name: xcode
-description: Drive Apple Xcode through the local `xcode-mcli` CLI instead of attaching the Xcode MCP server. Use when Codex needs Xcode MCP-equivalent capabilities from the terminal, including window discovery, tab selection, project builds, documentation search, test listing or execution, preview rendering, snippet execution, issue inspection, file reads or mutations, or compatibility verification against pinned Xcode MCP snapshots.
+description: Read when to interact with Xcode.app directly and task needs Xcode current window or tab selection, issue navigator data, build log inspection, documentation search, snippet execution, preview rendering, test discovery or selective execution, workspace-scoped file operations
 ---
 
 # Xcode
 
-## Overview
+## Choose The Tool Surface
 
-Use `xcode-mcli` as the terminal wrapper for Apple's Xcode MCP bridge.
+Switch to `xcode-mcli` when the task depends on Xcode's live app state or an Xcode MCP surface.
 
-Prefer this skill when the task needs Xcode access but the Xcode MCP server should stay detached from the agent context.
+Use `xcode-mcli` for:
+- current Xcode window or tab selection
+- issue navigator results
+- build log inspection as Xcode reports it
+- documentation search through Xcode
+- Swift snippet execution tied to a source file
+- SwiftUI preview rendering
+- test discovery or selective test execution from the active Xcode context
+- workspace-scoped file operations through Xcode
+- MCP surface snapshot or compatibility verification
 
 ## Locate The CLI
 
@@ -24,7 +33,7 @@ When working from the repo checkout, use the `xcode-mcli` repository root as the
 
 1. Run `xcode-mcli setup`.
 2. If the first live Xcode call triggers a macOS approval dialog, wait for the user to click `Allow`.
-3. Run `xcode-mcli windows list`.
+3. Open the project in Xcode with `xed /path/to/App.xcworkspace`, then run `xcode-mcli windows list`.
 4. If needed, pin the active tab with `xcode-mcli windows use --tab-identifier <id>`.
 5. Run the tool-backed command you need.
 
